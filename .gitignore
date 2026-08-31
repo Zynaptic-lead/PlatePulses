@@ -1,0 +1,21 @@
+# dependencies
+/node_modules
+/.pnpm
+/backend/node_modules
+
+# next.js build output
+/.next/
+/out/
+/backend/dist
+
+# environment variables
+.env
+.env*.local
+/backend/.env
+
+# IDE & system logs
+.DS_Store
+*.pem
+*.log
+powershell.cmd
+/backend/powershell.cmd
