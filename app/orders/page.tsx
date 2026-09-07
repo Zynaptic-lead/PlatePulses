@@ -87,7 +87,7 @@ export default function CustomerOrdersPage() {
     setTimeout(() => setReorderSuccess(null), 4000)
   }
 
-  const filteredOrders = mockCustomerOrders.filter(order => {
+  const filteredOrders = orders.filter(order => {
     if (activeTab === 'active') return order.status === 'active'
     if (activeTab === 'completed') return order.status === 'completed'
     return true
