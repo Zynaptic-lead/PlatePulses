@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X, User, LogOut, ShoppingBag, Heart, LayoutDashboard } from 'lucide-react'
+import { useCartStore } from '../../store/useCartStore'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -11,6 +12,8 @@ export default function Header() {
   const [avatar, setAvatar] = useState<string>('')
   const pathname = usePathname()
   const router = useRouter()
+  const { getItemCount } = useCartStore()
+  const cartCount = getItemCount()
 
   useEffect(() => {
     const userData = localStorage.getItem('user')
@@ -68,8 +71,18 @@ export default function Header() {
             ))}
           </div>
           
-          {/* Desktop Auth Buttons */}
+          {/* Desktop Auth & Cart Buttons */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Always-Active Cart Link with Live Badge */}
+            <Link href="/cart" className="p-2.5 hover:bg-gray-100 rounded-xl transition relative flex items-center justify-center border border-gray-200">
+              <ShoppingBag className="w-5 h-5 text-gray-800" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-600 text-white font-black text-[10px] rounded-full flex items-center justify-center shadow-md ring-2 ring-white">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
             {user ? (
               <>
                 <Link
@@ -83,14 +96,6 @@ export default function Header() {
                   <LayoutDashboard className="w-4 h-4" />
                   <span>My Dashboard</span>
                 </Link>
-
-                {user.role === 'customer' && (
-                  <>
-                    <Link href="/cart" className="p-2 hover:bg-gray-100 rounded-lg transition relative">
-                      <ShoppingBag className="w-5 h-5 text-gray-600" />
-                    </Link>
-                  </>
-                )}
                 <div className="relative group">
                   <button className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 rounded-xl transition">
                     {avatar ? (

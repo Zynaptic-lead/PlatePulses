@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Header from '../../components/layout/Header'
 import Footer from '../../components/layout/Footer'
 import { useCartStore } from '../../store/useCartStore'
+import { ordersApi } from '../../lib/api'
 import { 
   ShoppingBag, Clock, CheckCircle2, MapPin, Truck, Phone, 
   RotateCcw, Download, Star, ChevronRight, AlertCircle, ChefHat, 
-  X, ExternalLink, ShieldCheck, Heart, Search
+  X, ExternalLink, ShieldCheck, Heart, Search, ArrowRight, Utensils
 } from 'lucide-react'
 
 interface PastOrder {
@@ -25,79 +26,49 @@ interface PastOrder {
   pickupPin?: string
 }
 
-const mockCustomerOrders: PastOrder[] = [
-  {
-    id: 'ORD-9821',
-    restaurantName: 'Pizza Heaven',
-    restaurantImage: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format',
-    restaurantId: '1',
-    date: 'Today at 12:42 PM',
-    totalAmount: 55.00,
-    status: 'active',
-    pickupPin: '4892',
-    driver: {
-      name: 'Alex Rodriguez',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format',
-      phone: '+1 (555) 441-9920',
-      eta: 'Out for Delivery (ETA: 12 mins)'
-    },
-    items: [
-      { id: 'ITEM-01', name: 'Wood-Fired Margherita Pizza', quantity: 2, price: 18.50 },
-      { id: 'ITEM-04', name: 'Truffle Garlic Breadsticks', quantity: 1, price: 9.00 },
-      { id: 'ITEM-06', name: 'Italian Sparkling Lemonade', quantity: 2, price: 4.50 }
-    ]
-  },
-  {
-    id: 'ORD-8812',
-    restaurantName: 'Sushi Master',
-    restaurantImage: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800&auto=format',
-    restaurantId: '2',
-    date: 'Yesterday at 7:15 PM',
-    totalAmount: 64.50,
-    status: 'completed',
-    rating: 5,
-    items: [
-      { id: 'ITEM-11', name: 'Dragon Roll (8pcs)', quantity: 2, price: 19.00 },
-      { id: 'ITEM-12', name: 'Salmon Nigiri (4pcs)', quantity: 1, price: 14.50 },
-      { id: 'ITEM-13', name: 'Miso Soup Special', quantity: 2, price: 6.00 }
-    ]
-  },
-  {
-    id: 'ORD-7620',
-    restaurantName: 'Burger House',
-    restaurantImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format',
-    restaurantId: '3',
-    date: 'Aug 26, 2026 at 1:30 PM',
-    totalAmount: 38.00,
-    status: 'completed',
-    rating: 4,
-    items: [
-      { id: 'ITEM-21', name: 'Double Bacon Cheeseburger', quantity: 2, price: 14.00 },
-      { id: 'ITEM-22', name: 'Truffle Parmesan Fries', quantity: 1, price: 10.00 }
-    ]
-  },
-  {
-    id: 'ORD-6510',
-    restaurantName: 'Mediterranean Grill',
-    restaurantImage: 'https://images.unsplash.com/photo-1559314809-0d155014e29e?w=800&auto=format',
-    restaurantId: '5',
-    date: 'Aug 20, 2026 at 6:45 PM',
-    totalAmount: 42.00,
-    status: 'completed',
-    rating: 5,
-    items: [
-      { id: 'ITEM-31', name: 'Greek Chicken Gyro Platter', quantity: 2, price: 16.00 },
-      { id: 'ITEM-32', name: 'Hummus & Warm Pita', quantity: 1, price: 10.00 }
-    ]
-  }
-]
-
 export default function CustomerOrdersPage() {
   const { addItem } = useCartStore()
+  const [orders, setOrders] = useState<PastOrder[]>([])
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'completed'>('all')
   const [reorderSuccess, setReorderSuccess] = useState<string | null>(null)
   const [ratingModalOrder, setRatingModalOrder] = useState<PastOrder | null>(null)
   const [selectedRating, setSelectedRating] = useState(5)
+
+  // Load orders from localStorage and backend API
+  useEffect(() => {
+    const localRaw = localStorage.getItem('customerOrders')
+    let initial: PastOrder[] = []
+    if (localRaw) {
+      try { initial = JSON.parse(localRaw) } catch (e) {}
+    }
+    setOrders(initial)
+
+    ordersApi.getMyOrders().then(backendOrders => {
+      if (backendOrders && backendOrders.length > 0) {
+        const mapped = backendOrders.map((o: any) => ({
+          id: o.id.substring(0, 8),
+          restaurantName: o.restaurant?.name || 'Pizza Heaven',
+          restaurantImage: o.restaurant?.image || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format',
+          restaurantId: o.restaurantId,
+          date: new Date(o.createdAt).toLocaleDateString() + ' at ' + new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          totalAmount: o.totalAmount,
+          status: o.status === 'OUT_FOR_DELIVERY' || o.status === 'PREPARING' || o.status === 'PENDING' ? 'active' : 'completed',
+          pickupPin: o.pickupPin,
+          items: o.items.map((i: any) => ({
+            id: i.menuItemId,
+            name: i.menuItem?.name || 'Dish Item',
+            quantity: i.quantity,
+            price: i.price
+          }))
+        }))
+        setOrders(prev => {
+          const ids = new Set(prev.map(p => p.id))
+          const newOnly = mapped.filter((m: any) => !ids.has(m.id))
+          return [...prev, ...newOnly]
+        })
+      }
+    }).catch(() => {})
+  }, [])
 
   // 1-Click Reorder Handler
   const handleReorder = (order: PastOrder) => {

@@ -111,7 +111,19 @@ export default function CheckoutPage() {
       } catch (err) {}
     }
 
-    // 2. Persist order to localStorage immediately for instant dashboard visibility
+    // 2. Append transaction ledger entry for customer wallet/spending history
+    const currentTx = JSON.parse(localStorage.getItem('customerTransactions') || '[]')
+    const newTx = {
+      id: 'TX-' + Math.floor(1000 + Math.random() * 9000),
+      type: 'PURCHASE',
+      title: `Order #${orderIdCode} - ${newOrderObj.restaurantName}`,
+      amount: grandTotalAmt,
+      date: 'Just now',
+      orderId: orderIdCode
+    }
+    localStorage.setItem('customerTransactions', JSON.stringify([newTx, ...currentTx]))
+
+    // 3. Persist order to localStorage immediately for instant dashboard visibility
     const existingOrders = JSON.parse(localStorage.getItem('customerOrders') || '[]')
     localStorage.setItem('customerOrders', JSON.stringify([newOrderObj, ...existingOrders]))
     setPlacedOrderId(orderIdCode)
@@ -359,8 +371,12 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="flex gap-3 pt-2">
-                  <button onClick={() => setStep('address')} className="w-1/3 py-3 bg-gray-100 font-bold text-xs rounded-xl">Back</button>
-                  <button onClick={() => setStep('confirm')} className="w-2/3 py-3 bg-red-600 text-white font-extrabold text-xs rounded-xl shadow-lg">Review Order →</button>
+                  <button onClick={() => setStep('address')} className="w-1/3 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 font-extrabold text-xs rounded-xl transition">
+                    ← Back
+                  </button>
+                  <button onClick={() => setStep('confirm')} className="w-2/3 py-3 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-lg transition">
+                    Review Order →
+                  </button>
                 </div>
               </div>
             )}
@@ -373,17 +389,22 @@ export default function CheckoutPage() {
                   Review & Confirm Order
                 </h3>
 
-                <div className="p-4 bg-gray-50 rounded-2xl space-y-2 text-xs font-medium">
+                <div className="p-4 bg-gray-50 rounded-2xl space-y-2 text-xs font-medium border border-gray-200">
                   <p><strong className="text-gray-900">Delivery Address:</strong> {selectedAddress.address}</p>
                   <p><strong className="text-gray-900">Payment Method:</strong> {paymentMethod === 'wallet' ? 'PlatePulse Digital Wallet' : paymentMethod === 'card' ? 'Credit Card' : 'Cash on Delivery'}</p>
                 </div>
 
-                <button 
-                  onClick={handlePlaceOrder}
-                  className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm rounded-xl shadow-xl shadow-red-600/30 transition flex items-center justify-center gap-2"
-                >
-                  <CheckCircle className="w-5 h-5" /> Confirm & Pay ${grandTotalAmt.toFixed(2)}
-                </button>
+                <div className="flex gap-3">
+                  <button onClick={() => setStep('payment')} className="w-1/3 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 font-extrabold text-xs rounded-xl transition">
+                    ← Back
+                  </button>
+                  <button 
+                    onClick={handlePlaceOrder}
+                    className="w-2/3 py-4 bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm rounded-xl shadow-xl shadow-red-600/30 transition flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle className="w-5 h-5" /> Confirm & Pay ${grandTotalAmt.toFixed(2)}
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -410,7 +431,7 @@ export default function CheckoutPage() {
       {/* Add Address Modal */}
       {showAddressModal && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-gray-100">
             <div className="flex justify-between items-center border-b pb-3">
               <h3 className="font-bold text-gray-900">Add New Address</h3>
               <button onClick={() => setShowAddressModal(false)}><X className="w-5 h-5 text-gray-400" /></button>
@@ -418,13 +439,13 @@ export default function CheckoutPage() {
             <form onSubmit={handleAddNewAddress} className="space-y-3 text-xs font-semibold">
               <div>
                 <label className="block text-gray-500 uppercase mb-1">Street Address</label>
-                <input type="text" required placeholder="742 Evergreen Terrace" value={newAddrInput.street} onChange={e => setNewAddrInput({...newAddrInput, street: e.target.value})} className="w-full p-3 bg-gray-50 border rounded-xl outline-none" />
+                <input type="text" required placeholder="742 Evergreen Terrace" value={newAddrInput.street} onChange={e => setNewAddrInput({...newAddrInput, street: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl outline-none font-bold text-gray-900 placeholder:text-gray-400" />
               </div>
               <div>
                 <label className="block text-gray-500 uppercase mb-1">City</label>
-                <input type="text" required placeholder="New York" value={newAddrInput.city} onChange={e => setNewAddrInput({...newAddrInput, city: e.target.value})} className="w-full p-3 bg-gray-50 border rounded-xl outline-none" />
+                <input type="text" required placeholder="New York" value={newAddrInput.city} onChange={e => setNewAddrInput({...newAddrInput, city: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl outline-none font-bold text-gray-900 placeholder:text-gray-400" />
               </div>
-              <button type="submit" className="w-full py-3 bg-red-600 text-white font-extrabold rounded-xl">Save & Select Address</button>
+              <button type="submit" className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-extrabold rounded-xl shadow-lg">Save & Select Address</button>
             </form>
           </div>
         </div>

@@ -29,6 +29,7 @@ export default function RestaurantPage({ params }: PageProps) {
   // Auth Guard Modal State
   const [showAuthGuard, setShowAuthGuard] = useState(false)
   const [targetDishName, setTargetDishName] = useState<string>('')
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     params.then(async ({ id }) => {
@@ -118,7 +119,9 @@ export default function RestaurantPage({ params }: PageProps) {
     )
   }
 
-  const menu = restaurant.menuItems || restaurant.menu || []
+  const menu = (restaurant.menuItems || restaurant.menu || []).filter((item: any) => 
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
@@ -140,26 +143,28 @@ export default function RestaurantPage({ params }: PageProps) {
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex items-center gap-2">
-              <button onClick={() => setLiked(!liked)} className="p-2.5 bg-white/80 hover:bg-white backdrop-blur-md rounded-2xl text-rose-600 shadow-lg transition">
+              <button onClick={toggleWishlist} className="p-2.5 bg-white/80 hover:bg-white backdrop-blur-md rounded-2xl text-rose-600 shadow-lg transition flex items-center gap-1.5 font-bold text-xs">
                 <Heart className={`w-5 h-5 ${liked ? 'fill-rose-600' : ''}`} />
+                <span>{liked ? 'Saved to Wishlist' : 'Add to Wishlist'}</span>
               </button>
             </div>
           </div>
 
           {/* Restaurant Overlay Info */}
           <div className="absolute bottom-6 left-4 right-4 max-w-7xl mx-auto text-white space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 bg-red-600 font-extrabold text-[10px] uppercase tracking-wider rounded-full">
+                {restaurant.cuisine}
+              </span>
               {restaurant.isLive && (
-                <Link href={`/live/${restaurant.id}`} className="px-3 py-1 bg-red-600/90 backdrop-blur-md text-white font-extrabold text-xs rounded-full flex items-center gap-1.5 animate-pulse shadow-lg">
-                  <Video className="w-3.5 h-3.5" /> LIVE STREAM ACTIVE
+                <Link href={`/live/${restaurant.id}`} className="px-3 py-1 bg-white text-gray-900 font-extrabold text-[10px] uppercase tracking-wider rounded-full flex items-center gap-1.5 hover:bg-gray-100 transition">
+                  <div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-ping" />
+                  <span>Watch Live Kitchen</span>
                 </Link>
               )}
-              <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-emerald-400 font-extrabold text-xs rounded-full">
-                {restaurant.isOpen ? '🟢 Open Now' : '🔴 Closed'}
-              </span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{restaurant.name}</h1>
-            <p className="text-xs sm:text-sm text-gray-300 max-w-2xl">{restaurant.description}</p>
+            <p className="text-xs text-gray-300 max-w-xl font-medium">{restaurant.description}</p>
           </div>
         </div>
 
@@ -204,9 +209,21 @@ export default function RestaurantPage({ params }: PageProps) {
 
         {/* Menu Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-            <h2 className="text-2xl font-extrabold text-gray-900">Menu & Signature Dishes</h2>
-            <span className="text-xs text-gray-500 font-medium">{menu.length} items available</span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-200 pb-4 gap-4">
+            <div>
+              <h2 className="text-2xl font-extrabold text-gray-900">Menu & Related Food Choices</h2>
+              <p className="text-xs text-gray-500 font-medium pt-1">Search or filter through dishes and add your favorites to cart.</p>
+            </div>
+            <div className="w-full sm:w-72 relative">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input 
+                type="text"
+                placeholder="Search related food choices..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl text-xs outline-none font-bold text-gray-900 placeholder:text-gray-400 focus:border-gray-900"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
