@@ -267,7 +267,7 @@ export default function LiveBroadcastStudio() {
           <form onSubmit={handleSendChat} className="p-3 bg-white border-t border-gray-100 flex items-center gap-2">
             <input 
               type="text"
-              placeholder="Reply to viewers as Chef Mario..."
+              placeholder="Reply to viewers as Kitchen Host..."
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               className="flex-1 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:border-gray-900"

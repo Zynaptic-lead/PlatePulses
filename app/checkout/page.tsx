@@ -94,18 +94,19 @@ export default function CheckoutPage() {
   // Handle Placing Order & Balance Deduction
   const handlePlaceOrder = async () => {
     const orderIdCode = 'ORD-' + Math.floor(1000 + Math.random() * 9000)
+    const targetRestName = items[0]?.restaurantName || (typeof window !== 'undefined' ? (JSON.parse(localStorage.getItem('user') || '{}').restaurantName) : '') || 'Gourmet Kitchen'
+    const targetRestImg = items[0]?.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format'
+
     const newOrderObj = {
       id: orderIdCode,
-      restaurantName: 'Pizza Heaven',
-      restaurantImage: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format',
+      restaurantName: targetRestName,
+      restaurantImage: targetRestImg,
       restaurantId: restaurantId || '1',
       date: new Date().toLocaleDateString() + ' at ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       totalAmount: grandTotalAmt,
       status: 'active',
       pickupPin: '4892',
-      items: items.length > 0 ? items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price })) : [
-        { id: '1', name: 'Margherita Pizza', quantity: 1, price: 18.50 }
-      ]
+      items: items.length > 0 ? items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price })) : []
     }
 
     // 1. Immediately deduct wallet balance if paying via digital wallet

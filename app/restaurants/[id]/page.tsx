@@ -33,26 +33,42 @@ export default function RestaurantPage({ params }: PageProps) {
 
   useEffect(() => {
     params.then(async ({ id }) => {
+      const savedUser = localStorage.getItem('user')
+      let userRestName = ''
+      let userCuisine = 'Gourmet'
+      let userChef = 'Head Chef'
+      let userDesc = 'Freshly prepared gourmet dishes made to order.'
+
+      if (savedUser) {
+        try {
+          const u = JSON.parse(savedUser)
+          if (u.restaurantName) userRestName = u.restaurantName
+          if (u.cuisine) userCuisine = u.cuisine
+          if (u.name) userChef = u.name
+          if (u.description) userDesc = u.description
+        } catch (e) {}
+      }
+
       let restData: any = null
       try {
         restData = await restaurantsApi.getById(id)
       } catch (err) {
         console.error('Failed to load restaurant from backend:', err)
-        // Fallback mock
+        // Dynamic Fallback
         restData = {
           id: id,
-          name: 'Pizza Heaven',
-          cuisine: 'Italian',
-          rating: 4.8,
-          reviewsCount: 2341,
-          deliveryTime: 25,
+          name: userRestName || 'Gourmet Kitchen',
+          cuisine: userCuisine,
+          rating: userRestName ? 'New Kitchen' : '4.8',
+          reviewsCount: userRestName ? 0 : 120,
+          deliveryTime: 20,
           deliveryFee: 2.99,
           minOrder: 15,
-          image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&auto=format',
+          image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&auto=format',
           isLive: true,
           isOpen: true,
-          chefName: 'Chef Mario Rossi',
-          description: 'Authentic Neapolitan pizzas baked in wood-fired oven. Family recipe since 1985.',
+          chefName: userChef,
+          description: userDesc,
           menuItems: []
         }
       }

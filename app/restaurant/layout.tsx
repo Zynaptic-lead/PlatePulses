@@ -20,10 +20,24 @@ export default function RestaurantLayout({
   const [kitchenStatus, setKitchenStatus] = useState<'open' | 'busy' | 'closed'>('open')
   const [isLive, setIsLive] = useState(true)
   const [restaurantInfo, setRestaurantInfo] = useState({
-    name: 'Pizza Heaven',
-    chef: 'Chef Mario Rossi',
-    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format'
+    name: 'My Kitchen',
+    chef: 'Kitchen Owner',
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format'
   })
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user')
+    if (savedUser) {
+      try {
+        const u = JSON.parse(savedUser)
+        setRestaurantInfo({
+          name: u.restaurantName || (u.name ? `${u.name}'s Kitchen` : 'My Kitchen'),
+          chef: u.name || 'Kitchen Owner',
+          image: u.restaurantImage || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format'
+        })
+      } catch (e) {}
+    }
+  }, [])
 
   const navigation = [
     { name: 'Order Management', href: '/restaurant/dashboard', icon: LayoutDashboard },

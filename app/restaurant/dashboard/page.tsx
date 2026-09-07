@@ -31,8 +31,8 @@ export default function RestaurantDashboard() {
   const [activeTab, setActiveTab] = useState<'all' | 'new' | 'preparing' | 'ready' | 'completed'>('all')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [restaurantName, setRestaurantName] = useState('Pizza Heaven')
-  const [ownerName, setOwnerName] = useState('Chef Mario')
+  const [restaurantName, setRestaurantName] = useState('My Kitchen')
+  const [ownerName, setOwnerName] = useState('Kitchen Owner')
 
   // Fetch real store data, owner profile, and live orders
   useEffect(() => {
@@ -41,8 +41,8 @@ export default function RestaurantDashboard() {
     if (savedUser) {
       try {
         const u = JSON.parse(savedUser)
-        setOwnerName(u.name || 'Chef Mario')
-        if (u.restaurantName) setRestaurantName(u.restaurantName)
+        setOwnerName(u.name || 'Kitchen Owner')
+        setRestaurantName(u.restaurantName || (u.name ? `${u.name}'s Kitchen` : 'My Kitchen'))
       } catch (e) {}
     }
 

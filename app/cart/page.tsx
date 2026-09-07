@@ -89,7 +89,7 @@ export default function CartPage() {
                     <ChefHat className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-base">Pizza Heaven</h3>
+                    <h3 className="font-bold text-gray-900 text-base">{items[0]?.restaurantName || 'Gourmet Kitchen'}</h3>
                     <p className="text-xs text-gray-500">Estimated delivery: 25 - 35 mins</p>
                   </div>
                 </div>

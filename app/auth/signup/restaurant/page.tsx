@@ -141,6 +141,11 @@ export default function RestaurantSignUpPage() {
         name: res.user.name,
         email: res.user.email,
         role: 'restaurant_owner',
+        restaurantName: form.restaurantName || `${res.user.name}'s Kitchen`,
+        cuisine: form.cuisine || 'Gourmet',
+        address: form.address ? `${form.address}, ${form.city}` : '',
+        phone: form.phone,
+        description: form.description || `Freshly prepared gourmet dishes made to order.`,
         isLoggedIn: true,
       }))
 

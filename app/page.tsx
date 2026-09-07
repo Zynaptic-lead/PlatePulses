@@ -184,19 +184,19 @@ export default function Home() {
             const myRest = {
               id: '1',
               name: u.restaurantName,
-              cuisine: u.cuisine || 'Italian',
-              categories: ['Pizza', 'Pasta', 'Italian', 'Popular'],
-              rating: 5.0,
+              cuisine: u.cuisine || 'Gourmet',
+              categories: [u.cuisine || 'Gourmet', 'Popular'],
+              rating: 0.0,
               reviews: 0,
               deliveryTime: 20,
               deliveryFee: 2.99,
               minOrder: 15,
-              image: u.restaurantImage || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format',
+              image: u.restaurantImage || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format',
               isLive: true,
               isOpen: true,
               featured: true,
               chef: u.name || 'Head Chef',
-              description: 'Authentic gourmet dishes baked fresh in wood-fired oven.',
+              description: u.description || 'Freshly prepared gourmet dishes made to order.',
             }
             setRestaurantsList(prev => [myRest, ...prev.filter(r => r.id !== '1')])
           }

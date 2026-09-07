@@ -80,10 +80,10 @@ export default function RestaurantsPage() {
         const u = JSON.parse(savedUser)
         if (u.restaurantName) {
           const myRest = {
-            id: 1, // Matches Pizza Heaven or primary store
+            id: 1,
             name: u.restaurantName,
             cuisine: u.cuisine || 'Gourmet Kitchen',
-            rating: 5.0,
+            rating: 0.0,
             reviews: 0,
             deliveryTime: 20,
             deliveryFee: 2.99,
