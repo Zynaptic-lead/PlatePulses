@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Plus, Search, Filter, Edit, Trash2, CheckCircle2, 
   X, Flame, Clock, Sparkles, AlertCircle, Image as ImageIcon,
