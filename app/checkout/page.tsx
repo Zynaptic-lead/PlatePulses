@@ -307,77 +307,52 @@ export default function CheckoutPage() {
 
             {/* Payment Section */}
             {step === 'payment' && (
-              <div className="bg-white rounded-3xl border border-gray-200 p-6 space-y-4 shadow-xs">
-                <h3 className="font-extrabold text-gray-900 text-lg flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-red-600" />
-                  Choose Payment Method
-                </h3>
+              <div className="bg-white rounded-3xl border border-gray-200 p-6 space-y-5 shadow-xs">
+                <div>
+                  <h3 className="font-extrabold text-gray-900 text-lg flex items-center gap-2">
+                    <Wallet className="w-5 h-5 text-emerald-600" />
+                    Payment Method
+                  </h3>
+                  <p className="text-xs text-gray-500 font-medium pt-0.5">All orders on PlatePulse are paid directly via your official PlatePulse Digital Wallet.</p>
+                </div>
                 
-                {/* PlatePulse Digital Wallet */}
-                <div 
-                  onClick={() => setPaymentMethod('wallet')}
-                  className={`border-2 rounded-2xl p-4 cursor-pointer transition flex items-center justify-between ${
-                    paymentMethod === 'wallet' ? 'border-emerald-600 bg-emerald-50/50' : 'border-gray-200'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Wallet className="w-6 h-6 text-emerald-600" />
+                {/* PlatePulse Digital Wallet (Sole Payment Method) */}
+                <div className="border-2 border-emerald-600 bg-emerald-50/60 rounded-2xl p-5 flex items-center justify-between shadow-xs">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-md">
+                      <Wallet className="w-6 h-6" />
+                    </div>
                     <div>
-                      <p className="font-extrabold text-gray-900 text-sm">PlatePulse Digital Wallet</p>
-                      <p className="text-xs text-gray-500 font-medium">Instant 1-click payment using your digital wallet</p>
+                      <p className="font-black text-gray-900 text-base">PlatePulse Digital Wallet</p>
+                      <p className="text-xs text-emerald-800 font-bold">
+                        Available Balance: ${walletBalance.toFixed(2)}
+                      </p>
+                      <p className="text-[11px] text-gray-500 font-medium pt-0.5">Order total (${grandTotalAmt.toFixed(2)}) will be deducted upon confirmation.</p>
                     </div>
                   </div>
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'wallet' ? 'border-emerald-600 bg-emerald-600' : 'border-gray-300'}`}>
-                    {paymentMethod === 'wallet' && <div className="w-2 h-2 bg-white rounded-full" />}
+                  <div className="w-6 h-6 rounded-full border-2 border-emerald-600 bg-emerald-600 flex items-center justify-center">
+                    <div className="w-2.5 h-2.5 bg-white rounded-full" />
                   </div>
                 </div>
 
-                {/* Credit Card */}
-                <div 
-                  onClick={() => setPaymentMethod('card')}
-                  className={`border-2 rounded-2xl p-4 cursor-pointer transition flex items-center justify-between ${
-                    paymentMethod === 'card' ? 'border-red-600 bg-red-50/50' : 'border-gray-200'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <CreditCard className="w-6 h-6 text-red-600" />
-                    <div>
-                      <p className="font-extrabold text-gray-900 text-sm">Credit or Debit Card</p>
-                      <p className="text-xs text-gray-500 font-medium">Visa, Mastercard, American Express</p>
-                    </div>
+                {walletBalance < grandTotalAmt ? (
+                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs space-y-2">
+                    <p className="font-extrabold text-amber-900">Insufficient Wallet Balance (${walletBalance.toFixed(2)})</p>
+                    <p className="text-amber-800 font-medium">You need ${(grandTotalAmt - walletBalance).toFixed(2)} more to complete this order.</p>
+                    <Link href="/customer/dashboard" className="inline-block px-4 py-2 bg-emerald-600 text-white font-extrabold text-xs rounded-xl shadow-xs">
+                      Top Up Wallet in Dashboard →
+                    </Link>
                   </div>
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'card' ? 'border-red-600 bg-red-600' : 'border-gray-300'}`}>
-                    {paymentMethod === 'card' && <div className="w-2 h-2 bg-white rounded-full" />}
+                ) : (
+                  <div className="flex gap-3 pt-2">
+                    <button onClick={() => setStep('address')} className="w-1/3 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 font-extrabold text-xs rounded-xl transition">
+                      ← Back
+                    </button>
+                    <button onClick={() => setStep('confirm')} className="w-2/3 py-3 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-lg transition">
+                      Review & Confirm Order →
+                    </button>
                   </div>
-                </div>
-
-                {/* Cash on Delivery */}
-                <div 
-                  onClick={() => setPaymentMethod('cash')}
-                  className={`border-2 rounded-2xl p-4 cursor-pointer transition flex items-center justify-between ${
-                    paymentMethod === 'cash' ? 'border-gray-900 bg-gray-50' : 'border-gray-200'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Banknote className="w-6 h-6 text-gray-700" />
-                    <div>
-                      <p className="font-extrabold text-gray-900 text-sm">Cash on Delivery</p>
-                      <p className="text-xs text-gray-500 font-medium">Pay cash directly to driver upon arrival</p>
-                    </div>
-                  </div>
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cash' ? 'border-gray-900 bg-gray-900' : 'border-gray-300'}`}>
-                    {paymentMethod === 'cash' && <div className="w-2 h-2 bg-white rounded-full" />}
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button onClick={() => setStep('address')} className="w-1/3 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 font-extrabold text-xs rounded-xl transition">
-                    ← Back
-                  </button>
-                  <button onClick={() => setStep('confirm')} className="w-2/3 py-3 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-lg transition">
-                    Review Order →
-                  </button>
-                </div>
+                )}
               </div>
             )}
 

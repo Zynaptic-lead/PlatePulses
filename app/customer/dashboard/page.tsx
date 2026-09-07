@@ -11,7 +11,7 @@ import {
   RotateCcw, Phone, ArrowRight, ShieldCheck, Settings, X, 
   Bell, ChevronRight, Sparkles, Lock, ArrowUpRight, Truck,
   Camera, Home, LogOut, LayoutDashboard, Utensils, ArrowDownRight,
-  Receipt
+  Receipt, Building, Copy
 } from 'lucide-react'
 
 interface Address {
@@ -61,6 +61,8 @@ export default function CustomerDashboardPage() {
 
   const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'wishlist' | 'wallet' | 'addresses' | 'profile'>('overview')
   const [walletBalance, setWalletBalance] = useState(50.00)
+  const [accountNumber, setAccountNumber] = useState('9928341052')
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [showTopupModal, setShowTopupModal] = useState(false)
   const [topupAmount, setTopupAmount] = useState('50')
   const [showAddressModal, setShowAddressModal] = useState(false)
@@ -101,10 +103,19 @@ export default function CustomerDashboardPage() {
       } catch (e) {}
     }
 
-    // 2. Load Avatar
+    // 2. Load Avatar & Account Number
     const savedAvatar = localStorage.getItem('customerAvatar')
     if (savedAvatar) {
       setProfile(prev => ({ ...prev, avatar: savedAvatar }))
+    }
+
+    const savedAccount = localStorage.getItem('customerAccountNumber')
+    if (savedAccount) {
+      setAccountNumber(savedAccount)
+    } else {
+      const generated = '992' + Math.floor(1000053 + Math.random() * 8999946).toString()
+      setAccountNumber(generated)
+      localStorage.setItem('customerAccountNumber', generated)
     }
 
     // 3. Load Wallet Balance
@@ -348,6 +359,17 @@ export default function CustomerDashboardPage() {
 
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 p-6 lg:p-10 max-w-6xl mx-auto overflow-y-auto">
+        {/* Toast Notification Banner (No window.alert) */}
+        {toastMessage && (
+          <div className="mb-6 p-4 bg-emerald-600 text-white rounded-2xl text-xs font-extrabold flex items-center justify-between shadow-lg animate-in fade-in slide-in-from-top duration-300">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-200" />
+              <span>{toastMessage}</span>
+            </div>
+            <button onClick={() => setToastMessage(null)}><X className="w-4 h-4 text-white" /></button>
+          </div>
+        )}
+
         {/* Reorder Success Banner */}
         {reorderMessage && (
           <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs font-bold flex items-center justify-between shadow-xs">
@@ -627,6 +649,52 @@ export default function CustomerDashboardPage() {
               </div>
             </div>
 
+            {/* Assigned Personal Bank Transfer Card */}
+            <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-100 pb-3 gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center font-bold">
+                    <Building className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-gray-900 text-sm">Personal Bank Transfer Account</h3>
+                    <p className="text-xs text-gray-500 font-medium">Transfer money from any bank app to top up your wallet</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 bg-emerald-50 text-emerald-700 font-extrabold text-xs rounded-full border border-emerald-100">
+                  Instant Auto-Credit
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-200 text-xs font-semibold">
+                <div>
+                  <span className="text-gray-500 uppercase block text-[10px]">Bank Name</span>
+                  <span className="font-extrabold text-gray-900 text-sm">PlatePulse Microfinance Bank</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 uppercase block text-[10px]">Account Name</span>
+                  <span className="font-extrabold text-gray-900 text-sm">{profile.name}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 uppercase block text-[10px]">Assigned Account Number</span>
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <span className="font-black text-red-600 text-base">{accountNumber}</span>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(accountNumber)
+                        setToastMessage('Account number copied to clipboard!')
+                        setTimeout(() => setToastMessage(null), 3000)
+                      }}
+                      className="px-2 py-1 bg-white border border-gray-300 rounded-lg text-gray-800 hover:bg-gray-100 text-[10px] font-bold shadow-xs flex items-center gap-1"
+                    >
+                      <Copy className="w-3 h-3" /> Copy
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Transaction Ledger Table */}
             <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-xs space-y-4">
               <div className="flex justify-between items-center border-b border-gray-100 pb-4">
@@ -766,7 +834,8 @@ export default function CustomerDashboardPage() {
               <button 
                 onClick={() => {
                   localStorage.setItem('user', JSON.stringify({ ...JSON.parse(localStorage.getItem('user') || '{}'), name: profile.name, phone: profile.phone }))
-                  alert('Profile updated successfully!')
+                  setToastMessage('Profile details saved successfully!')
+                  setTimeout(() => setToastMessage(null), 3000)
                 }} 
                 className="px-6 py-3.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-lg transition"
               >
