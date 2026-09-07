@@ -170,10 +170,37 @@ export default function Home() {
             chef: r.chefName || 'Head Chef',
             description: r.description || 'Authentic gourmet food made fresh to order.',
           }))
-          setRestaurantsList(formatted)
         }
       } catch (err) {
         console.log('Using default client restaurants list')
+      }
+
+      // Merge user custom restaurant if logged in as restaurant
+      const savedUser = localStorage.getItem('user')
+      if (savedUser) {
+        try {
+          const u = JSON.parse(savedUser)
+          if (u.restaurantName) {
+            const myRest = {
+              id: '1',
+              name: u.restaurantName,
+              cuisine: u.cuisine || 'Italian',
+              categories: ['Pizza', 'Pasta', 'Italian', 'Popular'],
+              rating: 5.0,
+              reviews: 0,
+              deliveryTime: 20,
+              deliveryFee: 2.99,
+              minOrder: 15,
+              image: u.restaurantImage || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format',
+              isLive: true,
+              isOpen: true,
+              featured: true,
+              chef: u.name || 'Head Chef',
+              description: 'Authentic gourmet dishes baked fresh in wood-fired oven.',
+            }
+            setRestaurantsList(prev => [myRest, ...prev.filter(r => r.id !== '1')])
+          }
+        } catch (e) {}
       }
     }
     loadRestaurants()

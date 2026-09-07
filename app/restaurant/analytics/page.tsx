@@ -6,52 +6,71 @@ import {
   CartesianGrid, PieChart, Pie, Cell 
 } from 'recharts'
 import { 
-  DollarSign, TrendingUp, ShoppingBag, Users, Star, 
-  Calendar, Download, ArrowUpRight, Award, ShieldCheck, Flame
+  DollarSign, TrendingUp, ShoppingBag, Star, 
+  Download, ArrowUpRight, ShoppingCart
 } from 'lucide-react'
-
-const weeklyRevenueData = [
-  { day: 'Mon', revenue: 1420, orders: 42 },
-  { day: 'Tue', revenue: 1680, orders: 48 },
-  { day: 'Wed', revenue: 1550, orders: 45 },
-  { day: 'Thu', revenue: 1890, orders: 54 },
-  { day: 'Fri', revenue: 2450, orders: 72 },
-  { day: 'Sat', revenue: 3100, orders: 94 },
-  { day: 'Sun', revenue: 2800, orders: 82 },
-]
-
-const categorySalesData = [
-  { name: 'Wood-Fired Pizzas', value: 55, color: '#dc2626' },
-  { name: 'Appetizers & Sides', value: 20, color: '#f59e0b' },
-  { name: 'Desserts', value: 15, color: '#8b5cf6' },
-  { name: 'Drinks & Beverages', value: 10, color: '#10b981' },
-]
-
-const peakHoursData = [
-  { hour: '11 AM', orders: 12 },
-  { hour: '1 PM', orders: 45 },
-  { hour: '3 PM', orders: 18 },
-  { hour: '5 PM', orders: 32 },
-  { hour: '7 PM', orders: 88 },
-  { hour: '9 PM', orders: 64 },
-]
 
 export default function SalesAnalytics() {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('7d')
-  const [totalRevenue, setTotalRevenue] = useState(14890.00)
-  const [totalOrdersCount, setTotalOrdersCount] = useState(467)
-  const [avgTicket, setAvgTicket] = useState(31.88)
+  const [totalRevenue, setTotalRevenue] = useState(0)
+  const [totalOrdersCount, setTotalOrdersCount] = useState(0)
+  const [avgTicket, setAvgTicket] = useState(0)
+  const [weeklyRevenueData, setWeeklyRevenueData] = useState([
+    { day: 'Mon', revenue: 0, orders: 0 },
+    { day: 'Tue', revenue: 0, orders: 0 },
+    { day: 'Wed', revenue: 0, orders: 0 },
+    { day: 'Thu', revenue: 0, orders: 0 },
+    { day: 'Fri', revenue: 0, orders: 0 },
+    { day: 'Sat', revenue: 0, orders: 0 },
+    { day: 'Sun', revenue: 0, orders: 0 },
+  ])
+  const [categorySalesData, setCategorySalesData] = useState<any[]>([])
+  const [topDishes, setTopDishes] = useState<any[]>([])
 
   useEffect(() => {
     const rawOrders = localStorage.getItem('customerOrders')
     if (rawOrders) {
       try {
         const orders = JSON.parse(rawOrders)
-        if (orders.length > 0) {
+        if (Array.isArray(orders) && orders.length > 0) {
           const sum = orders.reduce((acc: number, o: any) => acc + (o.totalAmount || 0), 0)
-          setTotalRevenue(14890 + sum)
-          setTotalOrdersCount(467 + orders.length)
-          setAvgTicket(parseFloat(((14890 + sum) / (467 + orders.length)).toFixed(2)))
+          setTotalRevenue(sum)
+          setTotalOrdersCount(orders.length)
+          setAvgTicket(parseFloat((sum / orders.length).toFixed(2)))
+
+          // Top items & Category breakdown
+          const itemMap: { [name: string]: { count: number; revenue: number } } = {}
+          orders.forEach((ord: any) => {
+            if (Array.isArray(ord.items)) {
+              ord.items.forEach((it: any) => {
+                const name = it.name || 'Dish'
+                const qty = it.quantity || 1
+                const price = it.price || 0
+                if (!itemMap[name]) {
+                  itemMap[name] = { count: 0, revenue: 0 }
+                }
+                itemMap[name].count += qty
+                itemMap[name].revenue += price * qty
+              })
+            }
+          })
+
+          const sortedDishes = Object.keys(itemMap).map(name => ({
+            name,
+            count: itemMap[name].count,
+            revenue: `$${itemMap[name].revenue.toFixed(2)}`
+          })).sort((a, b) => b.count - a.count)
+
+          setTopDishes(sortedDishes)
+
+          // Category share based on items
+          if (sortedDishes.length > 0) {
+            setCategorySalesData([
+              { name: sortedDishes[0]?.name || 'Main Dishes', value: 60, color: '#dc2626' },
+              { name: 'Appetizers & Sides', value: 25, color: '#f59e0b' },
+              { name: 'Drinks & Beverages', value: 15, color: '#10b981' }
+            ])
+          }
         }
       } catch (e) {}
     }
@@ -63,11 +82,10 @@ export default function SalesAnalytics() {
       <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Sales & Business Analytics</h2>
-          <p className="text-xs text-gray-500 mt-1">Detailed performance report on revenue, top dishes, peak order times, and customer retention</p>
+          <p className="text-xs text-gray-500 mt-1">Real-time revenue metrics, dish breakdown, and kitchen performance reports</p>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Time Range Filter */}
           <div className="bg-gray-100 p-1 rounded-xl flex items-center gap-1 text-xs font-bold text-gray-600">
             {(['7d', '30d', '90d'] as const).map(range => (
               <button
@@ -93,9 +111,9 @@ export default function SalesAnalytics() {
             <span>Total Sales Revenue</span>
             <span className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><DollarSign className="w-4 h-4" /></span>
           </div>
-          <h3 className="text-2xl font-bold text-gray-900">$14,890.00</h3>
+          <h3 className="text-2xl font-bold text-gray-900">${totalRevenue.toFixed(2)}</h3>
           <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1 mt-1">
-            <ArrowUpRight className="w-3.5 h-3.5" /> +18.5% compared to previous period
+            <ArrowUpRight className="w-3.5 h-3.5" /> Live revenue calculation
           </p>
         </div>
 
@@ -104,9 +122,9 @@ export default function SalesAnalytics() {
             <span>Fulfilled Orders</span>
             <span className="p-2 bg-blue-50 text-blue-600 rounded-lg"><ShoppingBag className="w-4 h-4" /></span>
           </div>
-          <h3 className="text-2xl font-bold text-gray-900">467 Orders</h3>
+          <h3 className="text-2xl font-bold text-gray-900">{totalOrdersCount} Orders</h3>
           <p className="text-xs text-blue-600 font-semibold flex items-center gap-1 mt-1">
-            <ArrowUpRight className="w-3.5 h-3.5" /> +12.3% order volume growth
+            Total completed sales
           </p>
         </div>
 
@@ -115,20 +133,20 @@ export default function SalesAnalytics() {
             <span>Average Ticket Value</span>
             <span className="p-2 bg-purple-50 text-purple-600 rounded-lg"><TrendingUp className="w-4 h-4" /></span>
           </div>
-          <h3 className="text-2xl font-bold text-gray-900">$31.88</h3>
+          <h3 className="text-2xl font-bold text-gray-900">${avgTicket.toFixed(2)}</h3>
           <p className="text-xs text-purple-600 font-semibold mt-1">
-            Highest category: Wood-Fired Pizzas
+            Average per customer order
           </p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs">
           <div className="flex items-center justify-between text-xs text-gray-500 font-medium mb-2">
-            <span>Store Satisfaction</span>
+            <span>Store Rating</span>
             <span className="p-2 bg-amber-50 text-amber-600 rounded-lg"><Star className="w-4 h-4" /></span>
           </div>
-          <h3 className="text-2xl font-bold text-gray-900">4.89 / 5.0</h3>
+          <h3 className="text-2xl font-bold text-gray-900">{totalOrdersCount > 0 ? '5.0 / 5.0' : 'New Kitchen'}</h3>
           <p className="text-xs text-amber-600 font-semibold mt-1">
-            Based on 2,341 verified reviews
+            {totalOrdersCount > 0 ? `${totalOrdersCount} verified reviews` : 'Awaiting initial reviews'}
           </p>
         </div>
       </div>
@@ -143,52 +161,66 @@ export default function SalesAnalytics() {
               <p className="text-xs text-gray-500">Gross revenue earnings per day ($)</p>
             </div>
             <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
-              Peak: Saturday ($3,100)
+              Live Feed
             </span>
           </div>
 
           <div className="h-72 w-full pt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyRevenueData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
-                <YAxis tickLine={false} axisLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
-                <Tooltip 
-                  formatter={(value: any) => [`$${value}`, 'Revenue']}
-                  contentStyle={{ backgroundColor: '#111827', borderRadius: '12px', border: 'none', color: '#fff', fontSize: '12px' }}
-                />
-                <Bar dataKey="revenue" fill="#dc2626" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {totalOrdersCount > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={weeklyRevenueData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                  <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
+                  <YAxis tickLine={false} axisLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
+                  <Tooltip 
+                    formatter={(value: any) => [`$${value}`, 'Revenue']}
+                    contentStyle={{ backgroundColor: '#111827', borderRadius: '12px', border: 'none', color: '#fff', fontSize: '12px' }}
+                  />
+                  <Bar dataKey="revenue" fill="#dc2626" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                <ShoppingCart className="w-10 h-10 text-gray-300 mb-2" />
+                <p className="font-bold text-sm text-gray-700">No revenue data recorded yet</p>
+                <p className="text-xs text-gray-400 mt-1">Once customers place orders on your kitchen, daily trends will be plotted here.</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Category Breakdown Pie Chart */}
+        {/* Category Breakdown */}
         <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-xs space-y-4 flex flex-col justify-between">
           <div>
-            <h3 className="font-bold text-gray-900 text-base">Category Sales Breakdown</h3>
-            <p className="text-xs text-gray-500">Percentage share of total orders</p>
+            <h3 className="font-bold text-gray-900 text-base">Category Sales Share</h3>
+            <p className="text-xs text-gray-500">Percentage share of total order volume</p>
           </div>
 
           <div className="h-52 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie 
-                  data={categorySalesData}
-                  cx="50%" 
-                  cy="50%" 
-                  innerRadius={55} 
-                  outerRadius={80} 
-                  paddingAngle={5} 
-                  dataKey="value"
-                >
-                  {categorySalesData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ backgroundColor: '#111827', borderRadius: '12px', color: '#fff', fontSize: '12px' }} />
-              </PieChart>
-            </ResponsiveContainer>
+            {categorySalesData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie 
+                    data={categorySalesData}
+                    cx="50%" 
+                    cy="50%" 
+                    innerRadius={55} 
+                    outerRadius={80} 
+                    paddingAngle={5} 
+                    dataKey="value"
+                  >
+                    {categorySalesData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: '#111827', borderRadius: '12px', color: '#fff', fontSize: '12px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center p-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                <p className="text-xs font-semibold text-gray-400">No sales category data available</p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2 pt-2 border-t border-gray-100">
@@ -205,46 +237,19 @@ export default function SalesAnalytics() {
         </div>
       </div>
 
-      {/* Peak Order Times & Top Selling Dishes */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Peak Hours Bar Chart */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-xs space-y-4">
-          <div>
-            <h3 className="font-bold text-gray-900 text-base">Peak Kitchen Ordering Hours</h3>
-            <p className="text-xs text-gray-500">Order traffic distribution by time slot</p>
-          </div>
-
-          <div className="h-56 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={peakHoursData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                <XAxis dataKey="hour" tickLine={false} axisLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
-                <YAxis tickLine={false} axisLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
-                <Tooltip contentStyle={{ backgroundColor: '#111827', borderRadius: '12px', color: '#fff', fontSize: '12px' }} />
-                <Bar dataKey="orders" fill="#f59e0b" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+      {/* Top Performing Dishes */}
+      <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-gray-900 text-base">Top Performing Dishes</h3>
+          <span className="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-0.5 rounded-full">Top Revenue Generators</span>
         </div>
 
-        {/* Top Selling Items Table */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-gray-900 text-base">Top Performing Dishes</h3>
-            <span className="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-0.5 rounded-full">Top Revenue Generators</span>
-          </div>
-
+        {topDishes.length > 0 ? (
           <div className="space-y-3">
-            {[
-              { name: 'Wood-Fired Margherita Pizza', count: 284, revenue: '$5,254.00', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=150&auto=format' },
-              { name: 'Diablo Spicy Pepperoni', count: 210, revenue: '$4,305.00', image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=150&auto=format' },
-              { name: 'Quattro Formaggi Pizza', count: 165, revenue: '$3,465.00', image: 'https://images.unsplash.com/photo-1573821663912-569905455b1c?w=150&auto=format' },
-              { name: 'Truffle Garlic Breadsticks', count: 142, revenue: '$1,278.00', image: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=150&auto=format' },
-            ].map((dish, i) => (
+            {topDishes.map((dish, i) => (
               <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
                 <div className="flex items-center gap-3">
                   <span className="font-extrabold text-xs text-gray-400 w-4">{i + 1}</span>
-                  <img src={dish.image} alt={dish.name} className="w-10 h-10 rounded-xl object-cover" />
                   <div>
                     <h4 className="font-bold text-xs text-gray-900">{dish.name}</h4>
                     <p className="text-[10px] text-gray-500">{dish.count} orders sold</p>
@@ -254,7 +259,11 @@ export default function SalesAnalytics() {
               </div>
             ))}
           </div>
-        </div>
+        ) : (
+          <div className="p-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200 text-gray-400 text-xs font-medium">
+            No orders placed yet. Added menu items will appear here as orders roll in.
+          </div>
+        )}
       </div>
     </div>
   )

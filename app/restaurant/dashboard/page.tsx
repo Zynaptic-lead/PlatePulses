@@ -24,107 +24,7 @@ interface Order {
   specialInstructions?: string
 }
 
-const initialOrders: Order[] = [
-  {
-    id: 'ORD-9821',
-    customerName: 'Sarah Jenkins',
-    customerPhone: '+1 (555) 349-2019',
-    customerAddress: '742 Evergreen Terrace, Apt 3B',
-    items: [
-      { name: 'Wood-Fired Margherita Pizza', quantity: 2, price: 18.50, notes: 'Extra Basil, Crispy Crust' },
-      { name: 'Truffle Garlic Bread', quantity: 1, price: 9.00 },
-      { name: 'Italian Sparkling Lemonade', quantity: 2, price: 4.50 }
-    ],
-    totalAmount: 55.00,
-    paymentMethod: 'Credit Card (Paid)',
-    status: 'new',
-    placedAt: '2 mins ago',
-    estimatedPrepTime: 20,
-    pickupPin: '4892',
-    specialInstructions: 'Please cut pizza into 8 slices. Extra napkins in box!'
-  },
-  {
-    id: 'ORD-9820',
-    customerName: 'Marcus Vance',
-    customerPhone: '+1 (555) 882-1044',
-    customerAddress: '120 Ocean Drive, Suite 12',
-    items: [
-      { name: 'Quattro Formaggi Pizza', quantity: 1, price: 21.00 },
-      { name: 'Creamy Tiramisu', quantity: 2, price: 8.50 }
-    ],
-    totalAmount: 38.00,
-    paymentMethod: 'PlatePulse Wallet (Paid)',
-    status: 'new',
-    placedAt: '5 mins ago',
-    estimatedPrepTime: 15,
-    pickupPin: '1103'
-  },
-  {
-    id: 'ORD-9818',
-    customerName: 'David Kim',
-    customerPhone: '+1 (555) 902-3341',
-    customerAddress: '88 Tech Boulevard, 4th Floor',
-    items: [
-      { name: 'Pepperoni Supreme Pizza', quantity: 1, price: 19.50 },
-      { name: 'Spicy Buffalo Wings (10pcs)', quantity: 1, price: 14.00 }
-    ],
-    totalAmount: 33.50,
-    paymentMethod: 'Apple Pay (Paid)',
-    status: 'preparing',
-    placedAt: '14 mins ago',
-    estimatedPrepTime: 18,
-    assignedDriver: {
-      name: 'Alex Rodriguez',
-      phone: '+1 (555) 441-9920',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format',
-      eta: '8 mins away'
-    },
-    pickupPin: '7721'
-  },
-  {
-    id: 'ORD-9816',
-    customerName: 'Elena Rostova',
-    customerPhone: '+1 (555) 231-9088',
-    customerAddress: '312 Sunset Blvd',
-    items: [
-      { name: 'Calzone Classico', quantity: 2, price: 16.00 },
-      { name: 'Caesar Salad with Grilled Chicken', quantity: 1, price: 13.50 }
-    ],
-    totalAmount: 45.50,
-    paymentMethod: 'Credit Card (Paid)',
-    status: 'preparing',
-    placedAt: '18 mins ago',
-    estimatedPrepTime: 25,
-    assignedDriver: {
-      name: 'Michael Chang',
-      phone: '+1 (555) 771-3340',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format',
-      eta: 'Arrived at Restaurant'
-    },
-    pickupPin: '3049'
-  },
-  {
-    id: 'ORD-9814',
-    customerName: 'Jessica Taylor',
-    customerPhone: '+1 (555) 662-1100',
-    customerAddress: '45 Park Avenue',
-    items: [
-      { name: 'Prosciutto & Arugula Pizza', quantity: 1, price: 22.00 }
-    ],
-    totalAmount: 22.00,
-    paymentMethod: 'Credit Card (Paid)',
-    status: 'ready',
-    placedAt: '24 mins ago',
-    estimatedPrepTime: 20,
-    assignedDriver: {
-      name: 'John Miller',
-      phone: '+1 (555) 998-1212',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format',
-      eta: 'Waiting at Pickup Counter'
-    },
-    pickupPin: '5521'
-  }
-]
+const initialOrders: Order[] = []
 
 export default function RestaurantDashboard() {
   const [orders, setOrders] = useState<Order[]>([])
@@ -257,6 +157,10 @@ export default function RestaurantDashboard() {
   const newCount = orders.filter(o => o.status === 'new').length
   const prepCount = orders.filter(o => o.status === 'preparing').length
   const readyCount = orders.filter(o => o.status === 'ready').length
+  const completedCount = orders.filter(o => o.status === 'completed').length
+
+  const todayRevenue = orders.reduce((acc, o) => acc + (o.totalAmount || 0), 0)
+  const fulfillmentRate = orders.length > 0 ? Math.round((completedCount / orders.length) * 100) : 0
 
   return (
     <div className="space-y-8">
@@ -268,9 +172,9 @@ export default function RestaurantDashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 font-medium">Today's Revenue</p>
-            <h3 className="text-2xl font-bold text-gray-900">$1,482.50</h3>
+            <h3 className="text-2xl font-bold text-gray-900">${todayRevenue.toFixed(2)}</h3>
             <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
-              <ArrowUpRight className="w-3 h-3" /> +14.2% vs yesterday
+              <ArrowUpRight className="w-3 h-3" /> {orders.length} order{orders.length === 1 ? '' : 's'} recorded
             </span>
           </div>
         </div>
@@ -281,8 +185,8 @@ export default function RestaurantDashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 font-medium">Total Orders Today</p>
-            <h3 className="text-2xl font-bold text-gray-900">48</h3>
-            <span className="text-[11px] text-blue-600 font-semibold">96% Fulfilled</span>
+            <h3 className="text-2xl font-bold text-gray-900">{orders.length}</h3>
+            <span className="text-[11px] text-blue-600 font-semibold">{fulfillmentRate}% Fulfilled</span>
           </div>
         </div>
 
@@ -303,7 +207,7 @@ export default function RestaurantDashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 font-medium">Avg Kitchen Prep Time</p>
-            <h3 className="text-2xl font-bold text-gray-900">18.4 min</h3>
+            <h3 className="text-2xl font-bold text-gray-900">{orders.length > 0 ? '18 min' : '--'}</h3>
             <span className="text-[11px] text-purple-600 font-semibold">Target: &lt;20 min</span>
           </div>
         </div>
@@ -315,8 +219,8 @@ export default function RestaurantDashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 font-medium">Live Kitchen Stream</p>
-            <h3 className="text-2xl font-bold text-red-600">342 Viewers</h3>
-            <span className="text-[11px] text-gray-500 font-semibold">Camera #1 Active</span>
+            <h3 className="text-2xl font-bold text-red-600">Active</h3>
+            <span className="text-[11px] text-gray-500 font-semibold">Camera Ready</span>
           </div>
         </div>
       </div>

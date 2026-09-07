@@ -17,30 +17,29 @@ interface ChatMessage {
 }
 
 export default function LiveBroadcastStudio() {
-  const [isBroadcasting, setIsBroadcasting] = useState(true)
+  const [isBroadcasting, setIsBroadcasting] = useState(false)
   const [selectedCamera, setSelectedCamera] = useState('cam1')
   const [isMicMuted, setIsMicMuted] = useState(false)
-  const [viewerCount, setViewerCount] = useState(342)
-  const [reactionHearts, setReactionHearts] = useState(1280)
-  const [reactionFires, setReactionFires] = useState(892)
-  const [announcementText, setAnnouncementText] = useState('🔥 Chef Mario is preparing fresh Wood-Fired Margherita Pizzas right now!')
+  const [viewerCount, setViewerCount] = useState(0)
+  const [reactionHearts, setReactionHearts] = useState(0)
+  const [reactionFires, setReactionFires] = useState(0)
+  const [announcementText, setAnnouncementText] = useState('🔥 Kitchen live stream broadcast is ready!')
   
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { id: '1', user: 'Emily Vance', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format', message: 'That crust stretching technique is amazing! 😍', time: '12:44 PM' },
-    { id: '2', user: 'David Kim', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format', message: 'Just placed my order for the Pepperoni Supreme! Can I watch it get baked?', time: '12:45 PM' },
-    { id: '3', user: 'Chef Mario Rossi', avatar: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=100&auto=format', message: 'Welcome everyone! @David Kim putting your pizza in the wood oven in 2 mins!', time: '12:45 PM', isChef: true },
-    { id: '4', user: 'Jessica Taylor', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format', message: 'Smells delicious even through the screen haha! 🔥', time: '12:46 PM' },
-  ])
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
 
   const [inputMessage, setInputMessage] = useState('')
 
-  // Simulate viewer fluctuation and incoming chat
+  // Simulate viewer fluctuation when stream is broadcasting
   useEffect(() => {
-    if (!isBroadcasting) return
+    if (!isBroadcasting) {
+      setViewerCount(0)
+      return
+    }
+    setViewerCount(1)
 
     const interval = setInterval(() => {
-      setViewerCount(prev => prev + Math.floor(Math.random() * 5) - 2)
-      setReactionHearts(prev => prev + Math.floor(Math.random() * 3))
+      setViewerCount(prev => Math.max(1, prev + Math.floor(Math.random() * 3) - 1))
+      setReactionHearts(prev => prev + Math.floor(Math.random() * 2))
     }, 4000)
 
     return () => clearInterval(interval)
@@ -254,6 +253,14 @@ export default function LiveBroadcastStudio() {
                 <p className="leading-relaxed font-medium">{msg.message}</p>
               </div>
             ))}
+
+            {chatMessages.length === 0 && (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 text-gray-400 text-xs">
+                <MessageSquare className="w-8 h-8 mb-2 text-gray-300" />
+                <p className="font-bold text-gray-600">No chat messages yet</p>
+                <p className="text-[11px] mt-0.5">Comments from customers watching your stream will appear here in real time!</p>
+              </div>
+            )}
           </div>
 
           {/* Chat Input Box */}

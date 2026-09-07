@@ -11,7 +11,7 @@ import { restaurantsApi } from '../../../lib/api'
 import { 
   ArrowLeft, Star, Clock, Truck, Video, Heart, 
   ShoppingBag, Plus, Minus, MapPin, Phone, Share2,
-  Check, AlertCircle, Sparkles, Flame, Search
+  Check, AlertCircle, Sparkles, Flame, Search, Utensils
 } from 'lucide-react'
 
 interface PageProps {
@@ -33,13 +33,13 @@ export default function RestaurantPage({ params }: PageProps) {
 
   useEffect(() => {
     params.then(async ({ id }) => {
+      let restData: any = null
       try {
-        const data = await restaurantsApi.getById(id)
-        setRestaurant(data)
+        restData = await restaurantsApi.getById(id)
       } catch (err) {
         console.error('Failed to load restaurant from backend:', err)
         // Fallback mock
-        setRestaurant({
+        restData = {
           id: id,
           name: 'Pizza Heaven',
           cuisine: 'Italian',
@@ -53,16 +53,23 @@ export default function RestaurantPage({ params }: PageProps) {
           isOpen: true,
           chefName: 'Chef Mario Rossi',
           description: 'Authentic Neapolitan pizzas baked in wood-fired oven. Family recipe since 1985.',
-          menuItems: [
-            { id: 'ITEM-01', name: 'Wood-Fired Margherita Pizza', price: 18.50, description: 'San Marzano tomatoes, fresh mozzarella di bufala, organic basil', isPopular: true, inStock: true },
-            { id: 'ITEM-02', name: 'Quattro Formaggi Pizza', price: 21.00, description: 'Mozzarella, gorgonzola, parmesan, fontina cheese', isPopular: true, inStock: true },
-            { id: 'ITEM-03', name: 'Diablo Spicy Pepperoni', price: 20.50, description: 'Double spicy artisan pepperoni, hot honey drizzle', isSpicy: true, inStock: true },
-            { id: 'ITEM-04', name: 'Truffle Garlic Breadsticks', price: 9.00, description: 'Freshly baked dough sticks with black truffle oil', isVegetarian: true, inStock: true },
-          ]
-        })
-      } finally {
-        setLoading(false)
+          menuItems: []
+        }
       }
+
+      // Check if logged in user or owner created custom items in localStorage
+      const customMenuRaw = localStorage.getItem('restaurantMenu')
+      if (customMenuRaw) {
+        try {
+          const customMenu = JSON.parse(customMenuRaw)
+          if (Array.isArray(customMenu)) {
+            restData.menuItems = customMenu
+          }
+        } catch (e) {}
+      }
+
+      setRestaurant(restData)
+      setLoading(false)
     })
   }, [params])
 
@@ -284,6 +291,14 @@ export default function RestaurantPage({ params }: PageProps) {
                 </button>
               </div>
             ))}
+
+            {menu.length === 0 && (
+              <div className="col-span-full py-16 px-6 text-center bg-white rounded-3xl border border-dashed border-gray-300 space-y-3">
+                <Utensils className="w-12 h-12 text-gray-300 mx-auto" />
+                <h3 className="text-base font-bold text-gray-900">No dishes published by this kitchen yet</h3>
+                <p className="text-xs text-gray-500 max-w-sm mx-auto">The kitchen is preparing its menu. Check back soon or visit restaurant menu management!</p>
+              </div>
+            )}
           </div>
         </div>
       </main>

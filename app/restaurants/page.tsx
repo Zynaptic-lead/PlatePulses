@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Header from '../../components/layout/Header'
 import { Search, Star, Clock, Truck, Video, Heart, Filter, MapPin, ChevronDown, ArrowLeft } from 'lucide-react'
@@ -71,14 +71,43 @@ const restaurants = [
 export default function RestaurantsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [liked, setLiked] = useState<number[]>([])
+  const [allRestaurants, setAllRestaurants] = useState<any[]>(restaurants)
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user')
+    if (savedUser) {
+      try {
+        const u = JSON.parse(savedUser)
+        if (u.restaurantName) {
+          const myRest = {
+            id: 1, // Matches Pizza Heaven or primary store
+            name: u.restaurantName,
+            cuisine: u.cuisine || 'Gourmet Kitchen',
+            rating: 5.0,
+            reviews: 0,
+            deliveryTime: 20,
+            deliveryFee: 2.99,
+            minOrder: 15,
+            image: u.restaurantImage || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format',
+            isLive: true,
+            isOpen: true,
+            distance: '0.5 km',
+            priceRange: '$$',
+          }
+          setAllRestaurants(prev => [myRest, ...prev.filter(r => r.id !== 1)])
+        }
+      } catch (e) {}
+    }
+  }, [])
 
   const toggleLike = (id: number, e: React.MouseEvent) => {
     e.stopPropagation()
     setLiked(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])
   }
 
-  const filteredRestaurants = restaurants.filter(r =>
-    r.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredRestaurants = allRestaurants.filter(r =>
+    r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.cuisine.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   return (

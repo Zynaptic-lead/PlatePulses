@@ -21,78 +21,10 @@ interface MenuItem {
   isPopular?: boolean
 }
 
-const initialMenuItems: MenuItem[] = [
-  {
-    id: 'ITEM-01',
-    name: 'Wood-Fired Margherita Pizza',
-    category: 'Pizza',
-    price: 18.50,
-    prepTime: 15,
-    description: 'San Marzano tomatoes, fresh mozzarella di bufala, organic basil, extra virgin olive oil.',
-    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format',
-    inStock: true,
-    isVegetarian: true,
-    isPopular: true
-  },
-  {
-    id: 'ITEM-02',
-    name: 'Quattro Formaggi Pizza',
-    category: 'Pizza',
-    price: 21.00,
-    prepTime: 18,
-    description: 'Mozzarella, gorgonzola, parmesan, fontina cheese with white garlic oil drizzle.',
-    image: 'https://images.unsplash.com/photo-1573821663912-569905455b1c?w=800&auto=format',
-    inStock: true,
-    isPopular: true
-  },
-  {
-    id: 'ITEM-03',
-    name: 'Diablo Spicy Pepperoni',
-    category: 'Pizza',
-    price: 20.50,
-    prepTime: 16,
-    description: 'Double spicy artisan pepperoni, hot honey drizzle, crushed red pepper flakes, fresh oregano.',
-    image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=800&auto=format',
-    inStock: true,
-    isSpicy: true,
-    isPopular: true
-  },
-  {
-    id: 'ITEM-04',
-    name: 'Truffle Garlic Breadsticks',
-    category: 'Appetizers',
-    price: 9.00,
-    prepTime: 10,
-    description: 'Freshly baked dough sticks infused with black truffle oil, roasted garlic butter and rosemary.',
-    image: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=800&auto=format',
-    inStock: true,
-    isVegetarian: true
-  },
-  {
-    id: 'ITEM-05',
-    name: 'Classic Creamy Tiramisu',
-    category: 'Desserts',
-    price: 8.50,
-    prepTime: 5,
-    description: 'Espresso-soaked ladyfingers, rich mascarpone cream, cocoa powder dust.',
-    image: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=800&auto=format',
-    inStock: false,
-    isPopular: true
-  },
-  {
-    id: 'ITEM-06',
-    name: 'Italian Sparkling Lemonade',
-    category: 'Drinks',
-    price: 4.50,
-    prepTime: 2,
-    description: 'Refreshing sparkling water infused with fresh Sicilian lemons and mint.',
-    image: 'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=800&auto=format',
-    inStock: true
-  }
-]
+const initialMenuItems: MenuItem[] = []
 
 export default function MenuManagement() {
-  const [items, setItems] = useState<MenuItem[]>(initialMenuItems)
+  const [items, setItems] = useState<MenuItem[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [searchQuery, setSearchQuery] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -356,6 +288,26 @@ export default function MenuManagement() {
             </div>
           </div>
         ))}
+
+        {filteredItems.length === 0 && (
+          <div className="col-span-full py-16 px-6 text-center bg-white rounded-2xl border border-dashed border-gray-300 space-y-4">
+            <div className="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto">
+              <Plus className="w-8 h-8" />
+            </div>
+            <div className="max-w-md mx-auto space-y-1">
+              <h3 className="text-lg font-bold text-gray-900">No dishes in your kitchen menu yet</h3>
+              <p className="text-xs text-gray-500">
+                Start building your restaurant's digital menu. Dishes added here will automatically appear on the public storefront for customers to order!
+              </p>
+            </div>
+            <button 
+              onClick={() => handleOpenModal()}
+              className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md shadow-red-600/20 inline-flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" /> Add Your First Dish
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Add / Edit Dish Modal */}
