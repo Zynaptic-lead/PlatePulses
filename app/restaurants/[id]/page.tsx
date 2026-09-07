@@ -11,7 +11,7 @@ import { restaurantsApi } from '../../../lib/api'
 import { 
   ArrowLeft, Star, Clock, Truck, Video, Heart, 
   ShoppingBag, Plus, Minus, MapPin, Phone, Share2,
-  Check, AlertCircle, Sparkles, Flame
+  Check, AlertCircle, Sparkles, Flame, Search
 } from 'lucide-react'
 
 interface PageProps {
