@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
   CartesianGrid, PieChart, Pie, Cell 
@@ -38,6 +38,24 @@ const peakHoursData = [
 
 export default function SalesAnalytics() {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('7d')
+  const [totalRevenue, setTotalRevenue] = useState(14890.00)
+  const [totalOrdersCount, setTotalOrdersCount] = useState(467)
+  const [avgTicket, setAvgTicket] = useState(31.88)
+
+  useEffect(() => {
+    const rawOrders = localStorage.getItem('customerOrders')
+    if (rawOrders) {
+      try {
+        const orders = JSON.parse(rawOrders)
+        if (orders.length > 0) {
+          const sum = orders.reduce((acc: number, o: any) => acc + (o.totalAmount || 0), 0)
+          setTotalRevenue(14890 + sum)
+          setTotalOrdersCount(467 + orders.length)
+          setAvgTicket(parseFloat(((14890 + sum) / (467 + orders.length)).toFixed(2)))
+        }
+      } catch (e) {}
+    }
+  }, [])
 
   return (
     <div className="space-y-8">

@@ -127,20 +127,59 @@ const initialOrders: Order[] = [
 ]
 
 export default function RestaurantDashboard() {
-  const [orders, setOrders] = useState<Order[]>(initialOrders)
+  const [orders, setOrders] = useState<Order[]>([])
   const [activeTab, setActiveTab] = useState<'all' | 'new' | 'preparing' | 'ready' | 'completed'>('all')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [restaurantName, setRestaurantName] = useState('Pizza Heaven')
+  const [ownerName, setOwnerName] = useState('Chef Mario')
 
-  // Fetch real store data and orders from NestJS backend
+  // Fetch real store data, owner profile, and live orders
   useEffect(() => {
+    // 1. Owner Profile
+    const savedUser = localStorage.getItem('user')
+    if (savedUser) {
+      try {
+        const u = JSON.parse(savedUser)
+        setOwnerName(u.name || 'Chef Mario')
+        if (u.restaurantName) setRestaurantName(u.restaurantName)
+      } catch (e) {}
+    }
+
+    // 2. Load Local Customer Orders
+    const localRaw = localStorage.getItem('customerOrders')
+    let localOrders: Order[] = []
+    if (localRaw) {
+      try {
+        const parsed = JSON.parse(localRaw)
+        localOrders = parsed.map((o: any) => ({
+          id: o.id || 'ORD-9821',
+          customerName: o.customerName || 'Sarah Jenkins',
+          customerPhone: o.customerPhone || '+1 (555) 349-2019',
+          customerAddress: o.deliveryAddress || o.address || '742 Evergreen Terrace, Apt 3B',
+          items: o.items || [{ name: 'Margherita Pizza', quantity: 2, price: 18.50 }],
+          totalAmount: o.totalAmount || 55.00,
+          paymentMethod: 'PlatePulse Digital Wallet (Paid)',
+          status: o.status || 'new',
+          placedAt: o.date || 'Just now',
+          estimatedPrepTime: 20,
+          pickupPin: o.pickupPin || '4892'
+        }))
+      } catch (e) {}
+    }
+    setOrders(localOrders)
+
+    // 3. Fetch from NestJS backend API
     async function fetchStoreData() {
       try {
         const store = await restaurantsApi.getMyStore()
+        if (store && store.name) {
+          setRestaurantName(store.name)
+        }
         if (store && store.orders && store.orders.length > 0) {
           const mapped = store.orders.map((o: any) => ({
             id: o.id.substring(0, 8),
-            customerName: o.customer?.name || 'Sarah Jenkins',
+            customerName: o.customer?.name || 'Customer',
             customerPhone: o.customer?.phone || '+1 (555) 349-2019',
             customerAddress: o.deliveryAddress || '742 Evergreen Terrace',
             items: o.items.map((i: any) => ({
@@ -149,35 +188,63 @@ export default function RestaurantDashboard() {
               price: i.price
             })),
             totalAmount: o.totalAmount,
-            paymentMethod: o.paymentMethod || 'Credit Card (Paid)',
+            paymentMethod: 'PlatePulse Digital Wallet (Paid)',
             status: o.status === 'PENDING' ? 'new' : o.status === 'PREPARING' ? 'preparing' : o.status === 'READY' ? 'ready' : 'completed',
             placedAt: new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             estimatedPrepTime: 20,
             pickupPin: o.pickupPin || '4892'
           }))
-          setOrders(mapped)
+          setOrders(prev => {
+            const ids = new Set(prev.map(p => p.id))
+            const newOnly = mapped.filter((m: any) => !ids.has(m.id))
+            return [...prev, ...newOnly]
+          })
         }
-      } catch (err) {
-        console.log('Using local restaurant dashboard state')
-      }
+      } catch (err) {}
     }
     fetchStoreData()
   }, [])
 
-  // Move order status forward
+  // Move order status forward & persist to customer tracking
   const updateOrderStatus = (orderId: string, newStatus: 'preparing' | 'ready' | 'completed') => {
-    setOrders(prev => prev.map(order => 
+    const updated = orders.map(order => 
       order.id === orderId ? { ...order, status: newStatus } : order
-    ))
+    )
+    setOrders(updated)
+    
+    // Update local customerOrders for live tracking map
+    const localRaw = localStorage.getItem('customerOrders')
+    if (localRaw) {
+      try {
+        const parsed = JSON.parse(localRaw)
+        const updatedLocal = parsed.map((o: any) => 
+          o.id === orderId ? { ...o, status: newStatus } : o
+        )
+        localStorage.setItem('customerOrders', JSON.stringify(updatedLocal))
+      } catch (e) {}
+    }
+
     if (selectedOrder && selectedOrder.id === orderId) {
       setSelectedOrder(prev => prev ? { ...prev, status: newStatus } : null)
     }
+
+    ordersApi.updateStatus(orderId, newStatus.toUpperCase()).catch(() => {})
   }
 
   // Reject order
   const handleRejectOrder = (orderId: string) => {
-    setOrders(prev => prev.filter(o => o.id !== orderId))
+    const updated = orders.filter(o => o.id !== orderId)
+    setOrders(updated)
     if (selectedOrder?.id === orderId) setSelectedOrder(null)
+
+    const localRaw = localStorage.getItem('customerOrders')
+    if (localRaw) {
+      try {
+        const parsed = JSON.parse(localRaw)
+        const updatedLocal = parsed.filter((o: any) => o.id !== orderId)
+        localStorage.setItem('customerOrders', JSON.stringify(updatedLocal))
+      } catch (e) {}
+    }
   }
 
   const filteredOrders = orders.filter(order => {

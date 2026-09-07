@@ -98,6 +98,19 @@ export default function MenuManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
 
+  // Load saved menu from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('restaurantMenu')
+    if (saved) {
+      try { setItems(JSON.parse(saved)) } catch (e) {}
+    }
+  }, [])
+
+  const updateItemsAndPersist = (newItems: MenuItem[]) => {
+    setItems(newItems)
+    localStorage.setItem('restaurantMenu', JSON.stringify(newItems))
+  }
+
   // Form State
   const [formData, setFormData] = useState({
     name: '',
@@ -150,14 +163,16 @@ export default function MenuManagement() {
 
   // Toggle inStock status
   const toggleStockStatus = (id: string) => {
-    setItems(prev => prev.map(item => 
+    const updated = items.map(item => 
       item.id === id ? { ...item, inStock: !item.inStock } : item
-    ))
+    )
+    updateItemsAndPersist(updated)
   }
 
   // Delete item
   const handleDeleteItem = (id: string) => {
-    setItems(prev => prev.filter(item => item.id !== id))
+    const updated = items.filter(item => item.id !== id)
+    updateItemsAndPersist(updated)
   }
 
   // Save dish submit
@@ -178,9 +193,11 @@ export default function MenuManagement() {
     }
 
     if (editingItem) {
-      setItems(prev => prev.map(i => i.id === editingItem.id ? newItem : i))
+      const updated = items.map(i => i.id === editingItem.id ? newItem : i)
+      updateItemsAndPersist(updated)
     } else {
-      setItems(prev => [newItem, ...prev])
+      const updated = [newItem, ...items]
+      updateItemsAndPersist(updated)
     }
     setIsModalOpen(false)
   }
