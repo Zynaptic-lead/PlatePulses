@@ -90,6 +90,32 @@ export default function RestaurantPage({ params }: PageProps) {
     setTimeout(() => setAddedItemName(null), 2000)
   }
 
+  const toggleWishlist = () => {
+    setLiked(!liked)
+    if (!restaurant) return
+    const currentRaw = localStorage.getItem('customerWishlist')
+    let current: any[] = []
+    if (currentRaw) {
+      try { current = JSON.parse(currentRaw) } catch (e) {}
+    }
+
+    if (!liked) {
+      const newEntry = {
+        id: restaurant.id,
+        name: restaurant.name,
+        cuisine: restaurant.cuisine + ' • ' + (restaurant.description || 'Gourmet cuisine'),
+        image: restaurant.image,
+        rating: restaurant.rating || 4.8,
+        type: 'restaurant'
+      }
+      const updated = [newEntry, ...current.filter((c: any) => c.id !== restaurant.id)]
+      localStorage.setItem('customerWishlist', JSON.stringify(updated))
+    } else {
+      const updated = current.filter((c: any) => c.id !== restaurant.id)
+      localStorage.setItem('customerWishlist', JSON.stringify(updated))
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
