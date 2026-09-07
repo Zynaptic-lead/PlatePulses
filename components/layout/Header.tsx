@@ -162,14 +162,24 @@ export default function Header() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X className="w-6 h-6 text-gray-900" /> : <Menu className="w-6 h-6 text-gray-900" />}
-          </button>
+          {/* Mobile Cart & Menu Controls */}
+          <div className="flex items-center gap-2 md:hidden">
+            <Link href="/cart" className="p-2 hover:bg-gray-100 rounded-lg relative flex items-center justify-center border border-gray-200">
+              <ShoppingBag className="w-5 h-5 text-gray-800" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-600 text-white font-black text-[9px] rounded-full flex items-center justify-center shadow-md">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-lg hover:bg-gray-100 transition"
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X className="w-6 h-6 text-gray-900" /> : <Menu className="w-6 h-6 text-gray-900" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation Menu */}

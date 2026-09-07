@@ -11,7 +11,7 @@ import {
   RotateCcw, Phone, ArrowRight, ShieldCheck, Settings, X, 
   Bell, ChevronRight, Sparkles, Lock, ArrowUpRight, Truck,
   Camera, Home, LogOut, LayoutDashboard, Utensils, ArrowDownRight,
-  Receipt, Building, Copy
+  Receipt, Building, Copy, Menu
 } from 'lucide-react'
 
 interface Address {
@@ -59,6 +59,7 @@ export default function CustomerDashboardPage() {
   const { addItem } = useCartStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'wishlist' | 'wallet' | 'addresses' | 'profile'>('overview')
   const [walletBalance, setWalletBalance] = useState(50.00)
   const [accountNumber, setAccountNumber] = useState('9928341052')
@@ -276,20 +277,59 @@ export default function CustomerDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* ── STICKY LEFT SIDEBAR (FIXED SCROLL) ── */}
-      <aside className="w-64 bg-white border-r border-gray-200 sticky top-0 h-screen overflow-y-auto flex flex-col justify-between p-5 shrink-0 z-30 shadow-xs">
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+      {/* ── MOBILE HEADER TOPBAR ── */}
+      <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-40 flex items-center justify-between shadow-xs">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-red-600 rounded-xl flex items-center justify-center shadow-md">
+            <span className="text-white font-black text-lg">P</span>
+          </div>
+          <div>
+            <span className="font-extrabold text-base text-gray-900 leading-none block">PlatePulse</span>
+            <span className="text-[9px] font-bold text-red-600 uppercase">Customer Hub</span>
+          </div>
+        </Link>
+
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 rounded-xl bg-gray-100 text-gray-800 hover:bg-gray-200 transition"
+        >
+          {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* ── MOBILE BACKDROP OVERLAY ── */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-gray-900/60 backdrop-blur-xs z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* ── RESPONSIVE LEFT SIDEBAR (STICKY ON DESKTOP, DRAWER ON MOBILE) ── */}
+      <aside className={`
+        fixed md:sticky top-0 left-0 inset-y-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col justify-between p-5 shrink-0 z-50 shadow-xs transition-transform duration-300 ease-in-out
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
         <div className="space-y-6">
           {/* Brand Header */}
-          <Link href="/" className="flex items-center gap-2 px-2">
-            <div className="w-9 h-9 bg-red-600 rounded-xl flex items-center justify-center shadow-md shadow-red-600/30">
-              <span className="text-white font-black text-xl">P</span>
-            </div>
-            <div>
-              <span className="font-extrabold text-lg text-gray-900 block leading-tight">PlatePulse</span>
-              <span className="text-[10px] font-bold text-red-600 tracking-wide uppercase">Customer Hub</span>
-            </div>
-          </Link>
+          <div className="flex items-center justify-between px-2">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-9 h-9 bg-red-600 rounded-xl flex items-center justify-center shadow-md shadow-red-600/30">
+                <span className="text-white font-black text-xl">P</span>
+              </div>
+              <div>
+                <span className="font-extrabold text-lg text-gray-900 block leading-tight">PlatePulse</span>
+                <span className="text-[10px] font-bold text-red-600 tracking-wide uppercase">Customer Hub</span>
+              </div>
+            </Link>
+            <button 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="md:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
           {/* User Mini Avatar Card */}
           <div className="p-3 bg-gray-50 rounded-2xl border border-gray-200 flex items-center gap-3">
@@ -321,7 +361,10 @@ export default function CustomerDashboardPage() {
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => {
+                  setActiveTab(tab.id as any)
+                  setIsMobileMenuOpen(false)
+                }}
                 className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl transition ${
                   activeTab === tab.id
                     ? 'bg-red-600 text-white shadow-md shadow-red-600/20 font-extrabold'
@@ -358,7 +401,7 @@ export default function CustomerDashboardPage() {
       </aside>
 
       {/* ── MAIN CONTENT AREA ── */}
-      <main className="flex-1 p-6 lg:p-10 max-w-6xl mx-auto overflow-y-auto">
+      <main className="flex-1 p-4 sm:p-6 lg:p-10 max-w-6xl mx-auto overflow-y-auto w-full">
         {/* Toast Notification Banner (No window.alert) */}
         {toastMessage && (
           <div className="mb-6 p-4 bg-emerald-600 text-white rounded-2xl text-xs font-extrabold flex items-center justify-between shadow-lg animate-in fade-in slide-in-from-top duration-300">
