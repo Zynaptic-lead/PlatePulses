@@ -290,7 +290,7 @@ export default function CustomerSignUpPage() {
                           name="firstName"
                           value={form.firstName}
                           onChange={update}
-                          className="w-full px-4 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white placeholder-white/30 focus:border-white/40 focus:ring-2 focus:ring-white/20 transition-all outline-none"
+                          className="w-full px-4 py-2.5 rounded-xl bg-black/70 border border-white/20 text-white font-bold placeholder-white/50 focus:border-red-500 transition-all outline-none"
                           placeholder="John"
                         />
                       </div>
@@ -300,7 +300,7 @@ export default function CustomerSignUpPage() {
                           name="lastName"
                           value={form.lastName}
                           onChange={update}
-                          className="w-full px-4 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white placeholder-white/30 focus:border-white/40 focus:ring-2 focus:ring-white/20 transition-all outline-none"
+                          className="w-full px-4 py-2.5 rounded-xl bg-black/70 border border-white/20 text-white font-bold placeholder-white/50 focus:border-red-500 transition-all outline-none"
                           placeholder="Doe"
                         />
                       </div>
@@ -309,13 +309,13 @@ export default function CustomerSignUpPage() {
                     <div>
                       <label className="block text-sm font-medium text-white/80 mb-1.5">Email address</label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
                         <input
                           type="email"
                           name="email"
                           value={form.email}
                           onChange={update}
-                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white placeholder-white/30 focus:border-white/40 focus:ring-2 focus:ring-white/20 transition-all outline-none"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/70 border border-white/20 text-white font-bold placeholder-white/50 focus:border-red-500 transition-all outline-none"
                           placeholder="john@example.com"
                         />
                       </div>
@@ -324,13 +324,13 @@ export default function CustomerSignUpPage() {
                     <div>
                       <label className="block text-sm font-medium text-white/80 mb-1.5">Phone number</label>
                       <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
                         <input
                           type="tel"
                           name="phone"
                           value={form.phone}
                           onChange={update}
-                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white placeholder-white/30 focus:border-white/40 focus:ring-2 focus:ring-white/20 transition-all outline-none"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/70 border border-white/20 text-white font-bold placeholder-white/50 focus:border-red-500 transition-all outline-none"
                           placeholder="+1 234 567 8900"
                         />
                       </div>
@@ -339,13 +339,13 @@ export default function CustomerSignUpPage() {
                     <div>
                       <label className="block text-sm font-medium text-white/80 mb-1.5">Password</label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
                         <input
                           type={showPassword ? 'text' : 'password'}
                           name="password"
                           value={form.password}
                           onChange={update}
-                          className="w-full pl-10 pr-12 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white placeholder-white/30 focus:border-white/40 focus:ring-2 focus:ring-white/20 transition-all outline-none"
+                          className="w-full pl-10 pr-12 py-2.5 rounded-xl bg-black/70 border border-white/20 text-white font-bold placeholder-white/50 focus:border-red-500 transition-all outline-none"
                           placeholder="••••••••"
                         />
                         <button
