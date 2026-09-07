@@ -72,11 +72,19 @@ export default function CheckoutPage() {
   }, [router])
 
   const [step, setStep] = useState<'address' | 'payment' | 'confirm'>('address')
+  const [walletBalance, setWalletBalance] = useState(50.00)
   const [showAddressModal, setShowAddressModal] = useState(false)
   const [newAddrInput, setNewAddrInput] = useState({ label: 'Home', street: '', city: '' })
   const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'card' | 'cash'>('wallet')
   const [orderPlaced, setOrderPlaced] = useState(false)
   const [placedOrderId, setPlacedOrderId] = useState('PP-2341')
+
+  useEffect(() => {
+    const savedWallet = localStorage.getItem('customerWallet')
+    if (savedWallet) {
+      setWalletBalance(parseFloat(savedWallet))
+    }
+  }, [])
 
   const deliveryFee = 2.99
   const subtotalAmt = items.length > 0 ? getTotal() : 25.00
