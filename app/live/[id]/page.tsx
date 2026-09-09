@@ -118,12 +118,60 @@ export default function LiveStreamPage({ params }: PageProps) {
 
   useEffect(() => {
     params.then(async ({ id }) => {
-      const data = await getLiveStream(id)
+      let data = await getLiveStream(id)
+
+      const savedUser = localStorage.getItem('user')
+      const savedLive = localStorage.getItem('liveStreamSettings')
+      let userRestName = ''
+      let userChef = 'Head Chef'
+      let userCuisine = 'Gourmet'
+      let caption = '🔥 Preparing fresh signature dishes live right now!'
+      let description = 'Watch our kitchen team prepare gourmet dishes live in real-time. Ask questions and order directly from the stream!'
+
+      if (savedUser) {
+        try {
+          const u = JSON.parse(savedUser)
+          if (u.restaurantName) userRestName = u.restaurantName
+          if (u.name) userChef = u.name
+          if (u.cuisine) userCuisine = u.cuisine
+        } catch (e) {}
+      }
+
+      if (savedLive) {
+        try {
+          const parsed = JSON.parse(savedLive)
+          if (parsed.caption) caption = parsed.caption
+          if (parsed.description) description = parsed.description
+        } catch (e) {}
+      }
+
+      if (!data || userRestName || id === '1') {
+        data = {
+          id: id,
+          restaurantName: userRestName || (data?.restaurantName || 'Gourmet Kitchen'),
+          chef: userChef || (data?.chef || 'Head Chef'),
+          dish: caption,
+          orderId: 'PP-LIVE',
+          readyTime: 15,
+          videoUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&auto=format',
+          thumbnail: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&auto=format',
+          rating: 'New Kitchen',
+          viewers: 1,
+          likes: 0,
+          description: description,
+          streamStarted: 'Just now',
+          category: userCuisine,
+          tags: ['live', 'kitchen', 'fresh'],
+          recommendedVideos: [],
+          comments: []
+        }
+      }
+
       setStream(data)
       if (data?.comments) {
         setComments(data.comments)
       }
-      if (data?.likes) {
+      if (data?.likes !== undefined) {
         setLikeCount(data.likes)
       }
       setLoading(false)

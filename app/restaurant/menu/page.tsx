@@ -29,6 +29,7 @@ export default function MenuManagement() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
+  const [imageMode, setImageMode] = useState<'url' | 'file'>('url')
 
   // Load saved menu from localStorage
   useEffect(() => {
@@ -41,6 +42,18 @@ export default function MenuManagement() {
   const updateItemsAndPersist = (newItems: MenuItem[]) => {
     setItems(newItems)
     localStorage.setItem('restaurantMenu', JSON.stringify(newItems))
+  }
+
+  // Handle local image file conversion
+  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, image: reader.result as string }))
+      }
+      reader.readAsDataURL(file)
+    }
   }
 
   // Form State
@@ -63,6 +76,7 @@ export default function MenuManagement() {
   const handleOpenModal = (item?: MenuItem) => {
     if (item) {
       setEditingItem(item)
+      setImageMode(item.image.startsWith('data:') ? 'file' : 'url')
       setFormData({
         name: item.name,
         category: item.category,
@@ -77,13 +91,14 @@ export default function MenuManagement() {
       })
     } else {
       setEditingItem(null)
+      setImageMode('url')
       setFormData({
         name: '',
         category: 'Pizza',
         price: '',
         prepTime: '15',
         description: '',
-        image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format',
+        image: '',
         inStock: true,
         isSpicy: false,
         isVegetarian: false,
@@ -330,7 +345,7 @@ export default function MenuManagement() {
                   placeholder="e.g. Wood-Fired Margherita Pizza"
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:bg-white"
                 />
               </div>
 
@@ -340,7 +355,7 @@ export default function MenuManagement() {
                   <select 
                     value={formData.category}
                     onChange={e => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 outline-none focus:border-gray-900 focus:bg-white"
                   >
                     <option value="Pizza">Pizza</option>
                     <option value="Appetizers">Appetizers</option>
@@ -358,7 +373,7 @@ export default function MenuManagement() {
                     placeholder="18.50"
                     value={formData.price}
                     onChange={e => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:bg-white"
                   />
                 </div>
 
@@ -370,20 +385,55 @@ export default function MenuManagement() {
                     placeholder="15"
                     value={formData.prepTime}
                     onChange={e => setFormData({ ...formData, prepTime: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:bg-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Image URL</label>
-                <input 
-                  type="url"
-                  placeholder="https://images.unsplash.com/..."
-                  value={formData.image}
-                  onChange={e => setFormData({ ...formData, image: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900"
-                />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-gray-700 uppercase">Dish Image</label>
+                  <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-lg text-[11px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('url')}
+                      className={`px-2.5 py-0.5 rounded-md transition ${imageMode === 'url' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}
+                    >
+                      Image URL
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('file')}
+                      className={`px-2.5 py-0.5 rounded-md transition ${imageMode === 'file' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}
+                    >
+                      Upload File
+                    </button>
+                  </div>
+                </div>
+
+                {imageMode === 'file' ? (
+                  <div className="space-y-2">
+                    <input 
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileUpload}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-gray-900 file:text-white hover:file:bg-gray-800"
+                    />
+                    {formData.image && (
+                      <div className="relative h-24 w-full rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                        <img src={formData.image} alt="Dish Preview" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <input 
+                    type="url"
+                    placeholder="https://images.unsplash.com/..."
+                    value={formData.image}
+                    onChange={e => setFormData({ ...formData, image: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:bg-white"
+                  />
+                )}
               </div>
 
               <div>
@@ -393,7 +443,7 @@ export default function MenuManagement() {
                   placeholder="Describe ingredients, flavor notes..."
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:bg-white"
                 />
               </div>
 

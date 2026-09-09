@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { 
   Video, VideoOff, Mic, MicOff, Eye, MessageSquare, 
   Send, Sparkles, Flame, Heart, Settings, Radio, 
-  Camera, ShieldCheck, RefreshCw, AlertCircle, Share2, Award
+  Camera, ShieldCheck, RefreshCw, AlertCircle, Share2, Award, X
 } from 'lucide-react'
 
 interface ChatMessage {
@@ -18,6 +18,9 @@ interface ChatMessage {
 
 export default function LiveBroadcastStudio() {
   const [isBroadcasting, setIsBroadcasting] = useState(false)
+  const [showStartModal, setShowStartModal] = useState(false)
+  const [liveCaption, setLiveCaption] = useState('🔥 Preparing fresh signature dishes live right now!')
+  const [liveDescription, setLiveDescription] = useState('Watch our kitchen team prepare gourmet dishes live in real-time. Ask questions and order directly!')
   const [selectedCamera, setSelectedCamera] = useState('cam1')
   const [isMicMuted, setIsMicMuted] = useState(false)
   const [viewerCount, setViewerCount] = useState(0)
@@ -26,8 +29,44 @@ export default function LiveBroadcastStudio() {
   const [announcementText, setAnnouncementText] = useState('🔥 Kitchen live stream broadcast is ready!')
   
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
-
   const [inputMessage, setInputMessage] = useState('')
+
+  // Load existing stream settings
+  useEffect(() => {
+    const saved = localStorage.getItem('liveStreamSettings')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        if (parsed.caption) setLiveCaption(parsed.caption)
+        if (parsed.description) setLiveDescription(parsed.description)
+        if (parsed.caption) setAnnouncementText(parsed.caption)
+        if (parsed.isBroadcasting) setIsBroadcasting(true)
+      } catch (e) {}
+    }
+  }, [])
+
+  // Start live stream broadcast handler
+  const handleStartBroadcast = (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsBroadcasting(true)
+    setAnnouncementText(liveCaption)
+    setShowStartModal(false)
+    localStorage.setItem('liveStreamSettings', JSON.stringify({
+      isBroadcasting: true,
+      caption: liveCaption,
+      description: liveDescription
+    }))
+  }
+
+  // End stream broadcast handler
+  const handleEndBroadcast = () => {
+    setIsBroadcasting(false)
+    localStorage.setItem('liveStreamSettings', JSON.stringify({
+      isBroadcasting: false,
+      caption: liveCaption,
+      description: liveDescription
+    }))
+  }
 
   // Simulate viewer fluctuation when stream is broadcasting
   useEffect(() => {
@@ -81,7 +120,13 @@ export default function LiveBroadcastStudio() {
 
         {/* Toggle Broadcast Button */}
         <button 
-          onClick={() => setIsBroadcasting(!isBroadcasting)}
+          onClick={() => {
+            if (isBroadcasting) {
+              handleEndBroadcast()
+            } else {
+              setShowStartModal(true)
+            }
+          }}
           className={`px-6 py-2.5 font-bold text-sm rounded-xl shadow-md transition flex items-center gap-2 ${
             isBroadcasting 
               ? 'bg-gray-900 hover:bg-black text-white' 
@@ -281,6 +326,70 @@ export default function LiveBroadcastStudio() {
           </form>
         </div>
       </div>
+
+      {/* Start Live Stream Broadcast Modal */}
+      {showStartModal && (
+        <div className="fixed inset-0 z-50 bg-gray-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-200">
+            <div className="p-6 bg-gray-900 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Radio className="w-5 h-5 text-red-500 animate-pulse" />
+                <h3 className="text-lg font-bold">Start Live Broadcast</h3>
+              </div>
+              <button onClick={() => setShowStartModal(false)} className="p-1.5 text-gray-400 hover:text-white rounded-full">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleStartBroadcast} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Live Caption / Stream Title</label>
+                <input 
+                  type="text"
+                  required
+                  placeholder="e.g. 🔥 Sizzling Wood-Fired Margherita Pizza Live!"
+                  value={liveCaption}
+                  onChange={(e) => setLiveCaption(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Live Stream Description</label>
+                <textarea 
+                  rows={3}
+                  required
+                  placeholder="Describe what your kitchen is preparing live..."
+                  value={liveDescription}
+                  onChange={(e) => setLiveDescription(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:bg-white"
+                />
+              </div>
+
+              <div className="p-4 bg-red-50 rounded-2xl border border-red-100 text-xs text-red-800 space-y-1">
+                <p className="font-bold flex items-center gap-1.5"><Sparkles className="w-4 h-4 text-red-600" /> Pro Tip for Kitchen Hosts</p>
+                <p className="text-red-700">Customers watching your stream will see this caption & description directly on their live video feed and can order food in real time!</p>
+              </div>
+
+              <div className="pt-3 border-t border-gray-100 flex justify-end gap-3">
+                <button 
+                  type="button" 
+                  onClick={() => setShowStartModal(false)}
+                  className="px-5 py-2.5 border border-gray-200 text-gray-700 font-bold text-sm rounded-xl hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="px-6 py-2.5 bg-red-600 text-white font-bold text-sm rounded-xl hover:bg-red-700 shadow-md shadow-red-600/20 flex items-center gap-2"
+                >
+                  <Radio className="w-4 h-4" /> Go Live Now 🔴
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

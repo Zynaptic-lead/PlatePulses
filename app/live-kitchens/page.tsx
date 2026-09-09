@@ -14,21 +14,53 @@ export default function LiveKitchensPage() {
 
   useEffect(() => {
     async function fetchLiveKitchens() {
+      let liveKitchensList: any[] = []
       try {
         const data = await restaurantsApi.getAll()
         if (data && data.length > 0) {
           const liveOnly = data.filter((r: any) => r.isLive || r.liveStream?.isBroadcasting)
-          if (liveOnly.length > 0) {
-            setKitchens(liveOnly)
-          } else {
-            setKitchens(data) // Fallback to available restaurants
-          }
+          if (liveOnly.length > 0) liveKitchensList = liveOnly
         }
-      } catch (err) {
-        console.log('Using live stream fallback')
-      } finally {
-        setLoading(false)
+      } catch (err) {}
+
+      // Check registered user's custom kitchen live stream status
+      const savedUser = localStorage.getItem('user')
+      const savedLive = localStorage.getItem('liveStreamSettings')
+      if (savedUser) {
+        try {
+          const u = JSON.parse(savedUser)
+          if (u.restaurantName) {
+            let isBroadcasting = true
+            let caption = '🔥 Preparing fresh signature dishes live right now!'
+            if (savedLive) {
+              try {
+                const parsedLive = JSON.parse(savedLive)
+                isBroadcasting = parsedLive.isBroadcasting !== false
+                if (parsedLive.caption) caption = parsedLive.caption
+              } catch (e) {}
+            }
+            if (isBroadcasting) {
+              const myKitchen = {
+                id: '1',
+                name: u.restaurantName,
+                chefName: u.name || 'Head Chef',
+                cuisine: u.cuisine || 'Gourmet Kitchen',
+                rating: 'New Kitchen',
+                image: u.restaurantImage || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format',
+                isLive: true,
+                liveStream: {
+                  viewerCount: 1,
+                  announcementText: caption
+                }
+              }
+              liveKitchensList = [myKitchen, ...liveKitchensList.filter((k: any) => k.id !== '1')]
+            }
+          }
+        } catch (e) {}
       }
+
+      setKitchens(liveKitchensList)
+      setLoading(false)
     }
     fetchLiveKitchens()
   }, [])

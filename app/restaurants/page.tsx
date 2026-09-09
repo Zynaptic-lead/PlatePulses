@@ -3,75 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Header from '../../components/layout/Header'
-import { Search, Star, Clock, Truck, Video, Heart, Filter, MapPin, ChevronDown, ArrowLeft } from 'lucide-react'
+import { Search, Star, Clock, Truck, Video, Heart, Filter, MapPin, ChevronDown, ArrowLeft, Utensils } from 'lucide-react'
 
-const restaurants = [
-  {
-    id: 1,
-    name: 'Pizza Heaven',
-    cuisine: 'Italian • Pizza • Pasta',
-    rating: 4.8,
-    reviews: 2341,
-    deliveryTime: 25,
-    deliveryFee: 2.99,
-    minOrder: 15,
-    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format',
-    isLive: true,
-    isOpen: true,
-    distance: '1.2 km',
-    priceRange: '$$',
-  },
-  {
-    id: 2,
-    name: 'Sushi Master',
-    cuisine: 'Japanese • Sushi • Asian',
-    rating: 4.9,
-    reviews: 1856,
-    deliveryTime: 35,
-    deliveryFee: 3.99,
-    minOrder: 25,
-    image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800&auto=format',
-    isLive: false,
-    isOpen: true,
-    distance: '2.5 km',
-    priceRange: '$$$',
-  },
-  {
-    id: 3,
-    name: 'Burger House',
-    cuisine: 'American • Burgers • Fast Food',
-    rating: 4.7,
-    reviews: 3452,
-    deliveryTime: 20,
-    deliveryFee: 1.99,
-    minOrder: 12,
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format',
-    isLive: true,
-    isOpen: true,
-    distance: '0.8 km',
-    priceRange: '$',
-  },
-  {
-    id: 4,
-    name: 'Thai Spice',
-    cuisine: 'Thai • Asian • Spicy',
-    rating: 4.6,
-    reviews: 1234,
-    deliveryTime: 40,
-    deliveryFee: 2.49,
-    minOrder: 20,
-    image: 'https://images.unsplash.com/photo-1559314809-0d155014e29e?w=800&auto=format',
-    isLive: false,
-    isOpen: true,
-    distance: '3.0 km',
-    priceRange: '$$',
-  },
-]
+const restaurants: any[] = []
 
 export default function RestaurantsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [liked, setLiked] = useState<number[]>([])
-  const [allRestaurants, setAllRestaurants] = useState<any[]>(restaurants)
+  const [allRestaurants, setAllRestaurants] = useState<any[]>([])
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
@@ -94,7 +33,7 @@ export default function RestaurantsPage() {
             distance: '0.5 km',
             priceRange: '$$',
           }
-          setAllRestaurants(prev => [myRest, ...prev.filter(r => r.id !== 1)])
+          setAllRestaurants([myRest])
         }
       } catch (e) {}
     }
@@ -216,6 +155,14 @@ export default function RestaurantsPage() {
               </div>
             </Link>
           ))}
+
+          {filteredRestaurants.length === 0 && (
+            <div className="col-span-full py-16 px-6 text-center bg-white rounded-2xl border border-dashed border-gray-300 space-y-3">
+              <Utensils className="w-12 h-12 text-gray-300 mx-auto" />
+              <h3 className="text-base font-bold text-gray-900">No restaurants available yet</h3>
+              <p className="text-xs text-gray-500 max-w-sm mx-auto">Register your restaurant to publish your digital kitchen storefront!</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -52,19 +52,21 @@ export default function RestaurantDashboard() {
     if (localRaw) {
       try {
         const parsed = JSON.parse(localRaw)
-        localOrders = parsed.map((o: any) => ({
-          id: o.id || 'ORD-9821',
-          customerName: o.customerName || 'Sarah Jenkins',
-          customerPhone: o.customerPhone || '+1 (555) 349-2019',
-          customerAddress: o.deliveryAddress || o.address || '742 Evergreen Terrace, Apt 3B',
-          items: o.items || [{ name: 'Margherita Pizza', quantity: 2, price: 18.50 }],
-          totalAmount: o.totalAmount || 55.00,
-          paymentMethod: 'PlatePulse Digital Wallet (Paid)',
-          status: o.status || 'new',
-          placedAt: o.date || 'Just now',
-          estimatedPrepTime: 20,
-          pickupPin: o.pickupPin || '4892'
-        }))
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          localOrders = parsed.filter((o: any) => o && o.items && o.items.length > 0).map((o: any) => ({
+            id: o.id || `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+            customerName: o.customerName || 'Customer',
+            customerPhone: o.customerPhone || o.phone || '+1 (555) 000-0000',
+            customerAddress: o.deliveryAddress || o.address || 'Delivery Address',
+            items: o.items || [],
+            totalAmount: Number(o.totalAmount) || 0,
+            paymentMethod: o.paymentMethod || 'PlatePulse Digital Wallet (Paid)',
+            status: o.status || 'new',
+            placedAt: o.date || 'Just now',
+            estimatedPrepTime: 20,
+            pickupPin: o.pickupPin || '4892'
+          }))
+        }
       } catch (e) {}
     }
     setOrders(localOrders)
