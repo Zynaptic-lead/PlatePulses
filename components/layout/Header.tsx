@@ -41,17 +41,23 @@ export default function Header() {
 
   const isActive = (path: string) => pathname === path
 
+  const isHome = pathname === '/'
+
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
+    <header className={`sticky top-0 z-50 transition-colors ${
+      isHome 
+        ? 'bg-gray-950/85 backdrop-blur-xl border-b border-gray-800 text-white' 
+        : 'bg-white border-b border-gray-100 text-gray-900'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-red-600/30">
               <span className="text-white font-bold text-lg">P</span>
             </div>
-            <span className="font-bold text-xl text-gray-900 hidden sm:inline-block">PlatePulse</span>
-            <span className="font-bold text-xl text-gray-900 sm:hidden">PP</span>
+            <span className={`font-bold text-xl hidden sm:inline-block ${isHome ? 'text-white' : 'text-gray-900'}`}>PlatePulse</span>
+            <span className={`font-bold text-xl sm:hidden ${isHome ? 'text-white' : 'text-gray-900'}`}>PP</span>
           </Link>
           
           {/* Desktop Navigation */}
@@ -62,8 +68,8 @@ export default function Header() {
                 href={link.href}
                 className={`text-sm font-medium transition ${
                   isActive(link.href)
-                    ? 'text-gray-900 font-semibold'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? isHome ? 'text-white font-bold' : 'text-gray-900 font-semibold'
+                    : isHome ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 {link.label}
