@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
-import { Hero3DSection } from '../components/hero/Hero3DSection'
 import { restaurantsApi } from '../lib/api'
 import { 
   Search, 
@@ -240,8 +239,112 @@ export default function Home() {
       <Header />
 
       <main>
-        {/* Interactive 3D Cinematic Hero Experience */}
-        <Hero3DSection liveKitchensCount={liveKitchensCount} />
+        {/* Hero Section */}
+        <section className="bg-gradient-to-b from-gray-50 to-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <Link 
+                  href="/live-kitchens"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 rounded-full mb-6 hover:bg-red-100 transition"
+                >
+                  <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-red-600">{liveKitchensCount} Kitchens Live Now</span>
+                  <ArrowRight className="w-3 h-3 text-red-600" />
+                </Link>
+
+                <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 tracking-tight mb-4">
+                  Watch Your Food
+                  <span className="text-red-600 block">Come to Life</span>
+                </h1>
+
+                <p className="text-lg text-gray-600 mb-8 max-w-lg">
+                  Experience live kitchen streaming. Watch chefs prepare your meal in real-time. Fresh, transparent, and delivered to your door.
+                </p>
+
+                <div className="flex flex-wrap gap-4">
+                  <Link
+                    href="/restaurants"
+                    className="px-6 py-3 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-800 transition shadow-sm"
+                  >
+                    Order Now
+                  </Link>
+                  <Link
+                    href="/live-kitchens"
+                    className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition flex items-center gap-2"
+                  >
+                    <Play className="w-4 h-4" /> Watch Live
+                  </Link>
+                </div>
+
+                <div className="flex items-center gap-6 mt-8">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-green-600" />
+                    <span className="text-sm text-gray-600">100% Secure</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-green-600" />
+                    <span className="text-sm text-gray-600">30-min Delivery</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-green-600" />
+                    <span className="text-sm text-gray-600">10k+ Customers</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Featured Live Preview Card */}
+              <div className="relative">
+                <Link href="/live-kitchens" className="block">
+                  <div className="bg-white rounded-2xl overflow-hidden shadow-xl border border-gray-100 hover:shadow-2xl transition">
+                    <div className="flex items-center justify-between px-4 py-3 bg-gray-900">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                        <span className="text-xs font-medium text-white">LIVE STREAM</span>
+                      </div>
+                      <span className="text-xs text-gray-400">{liveKitchensCount} active kitchens</span>
+                    </div>
+                    <div className="relative h-64 bg-gray-900">
+                      <img 
+                        src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format" 
+                        onError={handleImageError}
+                        alt="Chef preparing pizza" 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                      <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-red-600 rounded-lg">
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                        <span className="text-xs font-bold text-white">LIVE</span>
+                        <Video className="w-3 h-3 text-white" />
+                      </div>
+                      <div className="absolute bottom-3 left-3 right-3">
+                        <div className="bg-black/60 backdrop-blur-xs rounded-lg p-3">
+                          <p className="text-white font-medium text-sm">Chef Mario preparing Margherita Pizza</p>
+                          <p className="text-gray-300 text-xs mt-0.5">Order #PP-2341 • Ready in 8 min</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-white">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                          <Eye className="w-5 h-5 text-gray-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">Watch live kitchen streams</p>
+                          <p className="text-xs text-gray-500">See your food being prepared in real-time</p>
+                        </div>
+                        <div className="px-4 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg">
+                          Watch Now
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+                <div className="absolute -top-3 -right-3 w-20 h-20 bg-red-500/10 rounded-full blur-xl"></div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Driver Recruitment Banner */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
